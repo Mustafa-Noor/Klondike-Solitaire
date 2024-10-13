@@ -1,0 +1,122 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\musno\\OneDrive\\Desktop\\SEMESTER 3\\DSA\\Projects\\MidProject\\Solitaire\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{7CF70D63-D33A-4F24-87C5-220992CEEDA3}|Solitaire\\Solitaire.csproj|c:\\users\\musno\\onedrive\\desktop\\semester 3\\dsa\\projects\\midproject\\solitaire\\solitaire\\structures\\cardqueue.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7CF70D63-D33A-4F24-87C5-220992CEEDA3}|Solitaire\\Solitaire.csproj|solutionrelative:solitaire\\structures\\cardqueue.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7CF70D63-D33A-4F24-87C5-220992CEEDA3}|Solitaire\\Solitaire.csproj|c:\\users\\musno\\onedrive\\desktop\\semester 3\\dsa\\projects\\midproject\\solitaire\\solitaire\\structures\\cardstack.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7CF70D63-D33A-4F24-87C5-220992CEEDA3}|Solitaire\\Solitaire.csproj|solutionrelative:solitaire\\structures\\cardstack.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7CF70D63-D33A-4F24-87C5-220992CEEDA3}|Solitaire\\Solitaire.csproj|c:\\users\\musno\\onedrive\\desktop\\semester 3\\dsa\\projects\\midproject\\solitaire\\solitaire\\classes\\deck.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7CF70D63-D33A-4F24-87C5-220992CEEDA3}|Solitaire\\Solitaire.csproj|solutionrelative:solitaire\\classes\\deck.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7CF70D63-D33A-4F24-87C5-220992CEEDA3}|Solitaire\\Solitaire.csproj|c:\\users\\musno\\onedrive\\desktop\\semester 3\\dsa\\projects\\midproject\\solitaire\\solitaire\\classes\\card.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7CF70D63-D33A-4F24-87C5-220992CEEDA3}|Solitaire\\Solitaire.csproj|solutionrelative:solitaire\\classes\\card.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7CF70D63-D33A-4F24-87C5-220992CEEDA3}|Solitaire\\Solitaire.csproj|c:\\users\\musno\\onedrive\\desktop\\semester 3\\dsa\\projects\\midproject\\solitaire\\solitaire\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{7CF70D63-D33A-4F24-87C5-220992CEEDA3}|Solitaire\\Solitaire.csproj|solutionrelative:solitaire\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7CF70D63-D33A-4F24-87C5-220992CEEDA3}|Solitaire\\Solitaire.csproj|c:\\users\\musno\\onedrive\\desktop\\semester 3\\dsa\\projects\\midproject\\solitaire\\solitaire\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7CF70D63-D33A-4F24-87C5-220992CEEDA3}|Solitaire\\Solitaire.csproj|solutionrelative:solitaire\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "C:\\Users\\musno\\OneDrive\\Desktop\\SEMESTER 3\\DSA\\Projects\\MidProject\\Solitaire\\Solitaire\\Form1.cs",
+              "RelativeDocumentMoniker": "Solitaire\\Form1.cs",
+              "ToolTip": "C:\\Users\\musno\\OneDrive\\Desktop\\SEMESTER 3\\DSA\\Projects\\MidProject\\Solitaire\\Solitaire\\Form1.cs",
+              "RelativeToolTip": "Solitaire\\Form1.cs",
+              "ViewState": "AQIAAAQAAAAAAAAAAAApwBUAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-13T18:58:12.195Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CardQueue.cs",
+              "DocumentMoniker": "C:\\Users\\musno\\OneDrive\\Desktop\\SEMESTER 3\\DSA\\Projects\\MidProject\\Solitaire\\Solitaire\\Structures\\CardQueue.cs",
+              "RelativeDocumentMoniker": "Solitaire\\Structures\\CardQueue.cs",
+              "ToolTip": "C:\\Users\\musno\\OneDrive\\Desktop\\SEMESTER 3\\DSA\\Projects\\MidProject\\Solitaire\\Solitaire\\Structures\\CardQueue.cs",
+              "RelativeToolTip": "Solitaire\\Structures\\CardQueue.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAFEAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-13T18:55:36.905Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CardStack.cs",
+              "DocumentMoniker": "C:\\Users\\musno\\OneDrive\\Desktop\\SEMESTER 3\\DSA\\Projects\\MidProject\\Solitaire\\Solitaire\\Structures\\CardStack.cs",
+              "RelativeDocumentMoniker": "Solitaire\\Structures\\CardStack.cs",
+              "ToolTip": "C:\\Users\\musno\\OneDrive\\Desktop\\SEMESTER 3\\DSA\\Projects\\MidProject\\Solitaire\\Solitaire\\Structures\\CardStack.cs",
+              "RelativeToolTip": "Solitaire\\Structures\\CardStack.cs",
+              "ViewState": "AQIAACgAAAAAAAAAAAAwwD8AAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-13T18:53:13.897Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Deck.cs",
+              "DocumentMoniker": "C:\\Users\\musno\\OneDrive\\Desktop\\SEMESTER 3\\DSA\\Projects\\MidProject\\Solitaire\\Solitaire\\Classes\\Deck.cs",
+              "RelativeDocumentMoniker": "Solitaire\\Classes\\Deck.cs",
+              "ToolTip": "C:\\Users\\musno\\OneDrive\\Desktop\\SEMESTER 3\\DSA\\Projects\\MidProject\\Solitaire\\Solitaire\\Classes\\Deck.cs",
+              "RelativeToolTip": "Solitaire\\Classes\\Deck.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-13T18:51:19.77Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Card.cs",
+              "DocumentMoniker": "C:\\Users\\musno\\OneDrive\\Desktop\\SEMESTER 3\\DSA\\Projects\\MidProject\\Solitaire\\Solitaire\\Classes\\Card.cs",
+              "RelativeDocumentMoniker": "Solitaire\\Classes\\Card.cs",
+              "ToolTip": "C:\\Users\\musno\\OneDrive\\Desktop\\SEMESTER 3\\DSA\\Projects\\MidProject\\Solitaire\\Solitaire\\Classes\\Card.cs",
+              "RelativeToolTip": "Solitaire\\Classes\\Card.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-13T18:50:51.995Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Form1.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\musno\\OneDrive\\Desktop\\SEMESTER 3\\DSA\\Projects\\MidProject\\Solitaire\\Solitaire\\Form1.cs",
+              "RelativeDocumentMoniker": "Solitaire\\Form1.cs",
+              "ToolTip": "C:\\Users\\musno\\OneDrive\\Desktop\\SEMESTER 3\\DSA\\Projects\\MidProject\\Solitaire\\Solitaire\\Form1.cs [Design]",
+              "RelativeToolTip": "Solitaire\\Form1.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-13T18:50:16.011Z",
+              "EditorCaption": " [Design]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
