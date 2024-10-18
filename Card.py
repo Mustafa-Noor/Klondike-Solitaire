@@ -21,7 +21,7 @@ cards = {}
 # Function to add a card to the dictionary
 def AddCard(cardID, rank, suit):
     cards[cardID] = Card(rank, suit)  # Create a new Card and add it to the dictionary
-    print(f"Added card: {cards[cardID]} with ID '{cardID}'")
+    # print(f"Added card: {cards[cardID]} with ID '{cardID}'")
 
 
 # Function to flip a card (flipCard method is part of the Card class)
@@ -76,5 +76,5 @@ status = CheckCardStatus('A-Hearts')  # Check the status of the flipped card
 if status:
     print(f"Card Status: {status[0]}, Is Face Up: {status[1]}")
 
-# Display all cards
-displayAllCards()
+# # Display all cards
+# displayAllCards()
