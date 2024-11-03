@@ -7,13 +7,18 @@ class Card:
         self.cardImage = imagePath
 
     def flipCard(self):
-        if not isFaceUp:
-            isFaceUp = True
-            imagePath = f"CardImages/{sef.checkRank(rank)}_of_{self.suit.lower()}.png"
+        if not self.isFaceUp:
+            self.isFaceUp = True
+            self.cardImage = f"CardImages/{checkRank(self.rank)}_of_{self.suit.lower()}.png"
         else:
-            isFaceUp = False
-            imagePath = f"SuitsImages/back.jpeg"
+            self.isFaceUp = False
+            self.cardImage = f"SuitsImages/back.jpeg"
 
+    def getCardImage(self):
+        if self.isFaceUp:
+            return f"CardImages/{checkRank(self.rank)}_of_{self.suit.lower()}.png"
+        else:
+            return f"SuitsImages/back.jpeg"
 
 
 cards = []

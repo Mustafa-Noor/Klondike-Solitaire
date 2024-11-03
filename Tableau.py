@@ -32,9 +32,16 @@ class TableauPile:
 
         return self.head.card
 
+    def getSize(self):
+        size = 0
+        temp = self.head
+        while(temp.next):
+            size += 1
+            temp = temp.next
+        return size
 
     def isEmpty(self):
         if self.head is None:
             return True
-            
+
         return False

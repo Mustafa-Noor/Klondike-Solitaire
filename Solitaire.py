@@ -6,6 +6,7 @@ import sys
 
 from CardClass import InitializeDeck, ShuffleCards
 from stockpile import StockPileClass
+from Tableau import TableauPile
 import random
 
 
@@ -20,13 +21,13 @@ class UI(QMainWindow):
         self.cards = InitializeDeck()
         print(len(self.cards))
         self.stockPile = StockPileClass()
+        self.wastePile = StockPileClass()
+        self.tableauColumns = [TableauPile() for i in range(7)]
 
-        for i in range(28):
-            self.stockPile.enqueue(self.cards.pop(0))
+        PrepareGame(self.cards,self.stockPile, self.tableauColumns)
+        self.updateTableau()
 
         
-
-
 
         self.stockLabel = self.findChild(QLabel, "Stockpile")
         self.CardFromStock = self.findChild(QLabel, "CardFromStock")
@@ -50,34 +51,101 @@ class UI(QMainWindow):
     def clicker(self, sen):
         print(sen)
 
-    def HandleStockPile(self):
-        card = self.stockPile.dequeue()
+    def updateTableau(self):
+        yOffset = 50  
 
-        if card is None:
-            self.CardFromStock.clear()
+        for i, tableau in enumerate(self.tableauColumns):
+            columnLabel = self.findChild(QLabel, f"column{i+1}")
 
-            cards = ShuffleCards(self.cards) 
-            self.stockPile.reQueue(cards)
+            # Check if columnLabel exists
+            if columnLabel is None:
+                print(f"Column {i+1} QLabel not found!")
+                continue
+
+            xGeometry = columnLabel.x()
+            yGeometry = columnLabel.y()
+            width = columnLabel.width()
+            height = columnLabel.height()
 
             
-            pixmap = QPixmap("SuitsImages/back.jpeg")
-            self.stockLabel.setPixmap(pixmap)
-            self.stockLabel.setScaledContents(True)
-            return
 
-       
-        pixmap = QPixmap(card.cardImage)
-        self.CardFromStock.setPixmap(pixmap)
-        self.CardFromStock.setScaledContents(True)
+            current = tableau.head
+            cardNo = 0 
+            while current:
+                
 
+                label = QLabel(columnLabel.parent())
+                if current.next is None:
+                    current.card.flipCard()
+                    
+                setImage(label, current.card.getCardImage())
+                label.setGeometry(xGeometry, yGeometry+(yOffset*cardNo), width, height)
+                label.setScaledContents(True)
+                label.show()
+
+                current = current.next
+                
+                cardNo += 1
+
+            
+
+
+
+
+
+    def HandleStockPile(self):
+            
+            card = handleDequeue(self.stockPile, self.wastePile)
+            if card is None:
+                removeImage(self.CardFromStock)
+                requeueCards(self.stockPile, self.wastePile)
+                setImage(self.stockLabel,"SuitsImages/back.jpeg")
+                return
         
-        if self.stockPile.peek() is None:
-            self.stockLabel.clear()
+            setImage(self.CardFromStock, card.cardImage)
+            
+            if self.stockPile.peek() is None:
+                removeImage(self.stockLabel)
+
+
+def handleDequeue(stockPile, wastePile):
+    card = stockPile.dequeue()
+    if card:
+        wastePile.enqueue(card)
+    return card
+
+def requeueCards(stockPile, wastePile):
+    cards = []
+    while not wastePile.isEmpty():
+        cards.append(wastePile.dequeue())
+    
+    cards = ShuffleCards(cards)
+    stockPile.reQueue(cards)
+
+
+def setImage(label, imageAddress):
+    pixmap = QPixmap(imageAddress)
+    label.setPixmap(pixmap)
+    label.setScaledContents(True)
 
 
 def removeImage(label):
-    blank_pixmap = QPixmap()
-    label.setPixmap(blank_pixmap)
+    label.clear()
+
+
+def PrepareGame(cards, stockPile, tableauColumns):
+
+    #prepare the tableau columns
+    for i in range(7):
+        for j in range(i+1):
+            tableauColumns[i].push(cards.pop(0))
+
+    # prepare the stockpile
+    for i in range(len(cards)):
+        stockPile.enqueue(cards.pop(0))
+
+
+
 
 
 # initialize the application
