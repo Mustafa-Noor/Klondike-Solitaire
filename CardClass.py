@@ -1,3 +1,4 @@
+import random
 class Card:
     def __init__(self, rank, suit, imagePath):
         self.suit = suit
@@ -8,17 +9,18 @@ class Card:
     def flipCard(self):
         if not isFaceUp:
             isFaceUp = True
+            imagePath = f"CardImages/{sef.checkRank(rank)}_of_{self.suit.lower()}.png"
         else:
             isFaceUp = False
+            imagePath = f"SuitsImages/back.jpeg"
 
 
 
+cards = []
 
-cards = {}
 
-
-def AddCard(cardID, rank, suit, imagePath):
-    cards[cardID] = Card(rank, suit, imagePath)
+def AddCard(rank, suit, imagePath):
+     cards.append(Card(rank, suit, imagePath))
 
 
 def InitializeDeck():
@@ -27,13 +29,17 @@ def InitializeDeck():
 
     for suit in suits:
         for rank in ranks:
-            cardID = f"{rank}-{suit}"  
             imagePath = f"CardImages/{checkRank(rank)}_of_{suit.lower()}.png"
-            print(imagePath)
-            AddCard(cardID, rank, suit, imagePath)  
+            AddCard(checkRank(rank), suit, imagePath)  
     
+    random.shuffle(cards)
     return cards
 
+
+def ShuffleCards(cards):
+    random.shuffle(cards)
+    return cards
+    
 def checkRank(rank):
     if rank == 'A':
         return "ace"

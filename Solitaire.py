@@ -4,7 +4,8 @@ from PyQt5.QtGui import QPixmap
 import sys
 
 
-from CardClass import InitializeDeck
+from CardClass import InitializeDeck, ShuffleCards
+from stockpile import StockPileClass
 import random
 
 
@@ -17,9 +18,17 @@ class UI(QMainWindow):
         uic.loadUi("SolitaireUI.ui", self)
 
         self.cards = InitializeDeck()
+        print(len(self.cards))
+        self.stockPile = StockPileClass()
+
+        for i in range(28):
+            self.stockPile.enqueue(self.cards.pop(0))
+
+        
 
 
-        self.StockPile = self.findChild(QLabel, "Stockpile")
+
+        self.stockLabel = self.findChild(QLabel, "Stockpile")
         self.CardFromStock = self.findChild(QLabel, "CardFromStock")
         self.SpadesPile = self.findChild(QLabel, "spadesPile")
         self.HeartsPile = self.findChild(QLabel, "heartsPile")
@@ -27,7 +36,7 @@ class UI(QMainWindow):
         self.DiamondsPile = self.findChild(QLabel, "diamondsPile")
 
 
-        self.StockPile.mousePressEvent = lambda event: self.printCards()
+        self.stockLabel.mousePressEvent = lambda event: self.HandleStockPile()
         self.CardFromStock.mousePressEvent = lambda event: self.clicker("cards")
         self.SpadesPile.mousePressEvent = lambda event: self.clicker("spades")
         self.HeartsPile.mousePressEvent = lambda event: self.clicker("hearts")
@@ -41,15 +50,35 @@ class UI(QMainWindow):
     def clicker(self, sen):
         print(sen)
 
-    def printCards(self):
-        keys = list(self.cards.keys())
-        random.shuffle(keys)
-        
-        card = self.cards[keys[0]]
-        print(card.suit)
+    def HandleStockPile(self):
+        card = self.stockPile.dequeue()
+
+        if card is None:
+            self.CardFromStock.clear()
+
+            cards = ShuffleCards(self.cards) 
+            self.stockPile.reQueue(cards)
+
+            
+            pixmap = QPixmap("SuitsImages/back.jpeg")
+            self.stockLabel.setPixmap(pixmap)
+            self.stockLabel.setScaledContents(True)
+            return
+
+       
         pixmap = QPixmap(card.cardImage)
         self.CardFromStock.setPixmap(pixmap)
         self.CardFromStock.setScaledContents(True)
+
+        
+        if self.stockPile.peek() is None:
+            self.stockLabel.clear()
+
+
+def removeImage(label):
+    blank_pixmap = QPixmap()
+    label.setPixmap(blank_pixmap)
+
 
 # initialize the application
 app = QApplication(sys.argv)
