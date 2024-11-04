@@ -27,14 +27,6 @@ class UI(QMainWindow):
         PrepareGame(self.cards,self.stockPile, self.tableauColumns)
         self.updateTableau()
 
-
-        
-
-        self.selectedCard = None  
-        self.tableauTable = []  
-
-
-
         
 
         self.stockLabel = self.findChild(QLabel, "Stockpile")
@@ -46,41 +38,14 @@ class UI(QMainWindow):
 
 
         self.stockLabel.mousePressEvent = lambda event: self.HandleStockPile()
-        self.CardFromStock.mousePressEvent = lambda event: self.checkClick(self.CardFromStock)
+        self.CardFromStock.mousePressEvent = lambda event: self.clicker("cards")
         self.SpadesPile.mousePressEvent = lambda event: self.clicker("spades")
         self.HeartsPile.mousePressEvent = lambda event: self.clicker("hearts")
         self.ClubsPile.mousePressEvent = lambda event: self.clicker("clubs")
         self.DiamondsPile.mousePressEvent = lambda event: self.clicker("diamonds")
 
-        self.initializeTableauLabels()
-
-
+        # show tha application
         self.show()
-
-    def initializeTableauLabels(self):
-        """Initialize tableau labels for selecting cards."""
-        for i in range(7):
-            for cardNo in range(self.tableauColumns[i].getSize()):  # Use the actual number of cards per column
-                label = self.findChild(QLabel, f"column{i+1}_label_{cardNo}")
-                if label is not None:
-                    print(f"Label column{i+1}_label_{cardNo} found!")
-                    self.tableauTable.append(label)
-                    label.mousePressEvent = lambda event, lbl=label: self.checkClick(lbl)
-                else:
-                    print(f"Label column{i+1}_label_{cardNo} not found!")
-
-    def checkClick(self, label):
-        # Reset previously selected label
-        if self.selectedCard is not None:
-            self.selectedCard.setStyleSheet("")  # Reset style
-            self.selectedCard.update()
-
-        # Set the new selected label
-        self.selectedCard = label
-        print("i was called!")
-        label.setStyleSheet("border: 2px solid black; padding: 5px;")
-        label.update()
-        
 
 
     def clicker(self, sen):
@@ -108,8 +73,8 @@ class UI(QMainWindow):
             cardNo = 0 
             while current:
                 
+
                 label = QLabel(columnLabel.parent())
-                label.setObjectName(f"column{i+1}_label_{cardNo}")
                 if current.next is None:
                     current.card.flipCard()
                 setImage(label, current.card.getCardImage())
@@ -120,6 +85,11 @@ class UI(QMainWindow):
                 current = current.next
                 
                 cardNo += 1
+
+            
+
+
+
 
 
     def HandleStockPile(self):

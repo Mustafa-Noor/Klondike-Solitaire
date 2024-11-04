@@ -35,10 +35,24 @@ class TableauPile:
     def getSize(self):
         size = 0
         temp = self.head
-        while(temp.next):
+        while temp is not None:  # Check for None instead of temp.next
             size += 1
             temp = temp.next
         return size
+
+    def is_valid_move(self, card):
+        """Check if moving 'card' onto this tableau pile follows Solitaire rules."""
+        # If the tableau is empty, only kings (rank 13) can be placed here
+        if not self.cards:
+            return card.rank == 13  # Assuming rank 13 represents a King
+
+        top_card = self.peek()
+
+        # Check descending order and alternating colors
+        return (
+            card.rank == top_card.rank - 1 and
+            card.color != top_card.color
+        )
 
     def isEmpty(self):
         if self.head is None:
