@@ -8,6 +8,7 @@ from CardClass import InitializeDeck, ShuffleCards
 from stockpile import StockPileClass
 from Tableau import TableauPile
 from TableauColumn import TableauColumnClass
+from Dictionary import Dictionaries
 import random
 
 
@@ -25,11 +26,13 @@ class UI(QMainWindow):
         self.wastePile = StockPileClass()
         self.tableauColumns = [TableauPile() for i in range(7)]
 
-        PrepareGame(self.cards,self.stockPile, self.tableauColumns)
+        self.dictionary = Dictionaries()
+
+        PrepareGame(self.cards,self.stockPile, self.tableauColumns, self.dictionary)
 
         self.updateTableau()
 
-
+        
         
 
         self.selectedCard = None  
@@ -51,6 +54,8 @@ class UI(QMainWindow):
         self.HeartsPile.mousePressEvent = lambda event: self.clicker("hearts")
         self.ClubsPile.mousePressEvent = lambda event: self.clicker("clubs")
         self.DiamondsPile.mousePressEvent = lambda event: self.clicker("diamonds")
+
+        
 
         
         self.initializeTableauLabels()
@@ -82,9 +87,12 @@ class UI(QMainWindow):
 
         # Set the new selected label
         self.selectedCard = label
-        print("i was called!")
+        column = extractColumn(label.objectName())
         label.setStyleSheet("border: 2px solid black; padding: 5px;")
         label.update()
+        print(column)
+
+
         
 
 
@@ -97,7 +105,6 @@ class UI(QMainWindow):
         for i, tableau in enumerate(self.tableauColumns):
             columnLabel = self.findChild(QLabel, f"column{i+1}")
 
-            
             if columnLabel is None:
                 print(f"Column {i+1} QLabel not found!")
                 continue
@@ -115,8 +122,11 @@ class UI(QMainWindow):
                 label = QLabel(columnLabel.parent())
                 label.setObjectName(f"column{i+1}_label_{cardNo}")
 
-                if current.next is None:  # If the tableau is empty after popping, flip the card
+                if current.next is None:  
                     card.flipCard()
+
+                # Debugging print to check if each card is set correctly
+                print(f"Setting image for {label.objectName()}")
 
                 setImage(label, card.getCardImage())
                 label.setGeometry(xGeometry, yGeometry + (yOffset * cardNo), width, height)
@@ -125,6 +135,7 @@ class UI(QMainWindow):
 
                 current = current.next  # Move to the next node
                 cardNo += 1
+
 
 
     def HandleStockPile(self):
@@ -156,6 +167,9 @@ def requeueCards(stockPile, wastePile):
     cards = ShuffleCards(cards)
     stockPile.reQueue(cards)
 
+def extractColumn(sen):
+    return sen.split('_')[0]
+
 
 def setImage(label, imageAddress):
     pixmap = QPixmap(imageAddress)
@@ -167,13 +181,15 @@ def removeImage(label):
     label.clear()
 
 
-def PrepareGame(cards, stockPile, tableauColumns):
+def PrepareGame(cards, stockPile, tableauColumns, dictionary):
 
     #prepare the tableau columns
     if cards: 
         for i in range(7):
             for j in range(i+1):
-                tableauColumns[i].push(cards.pop(0))
+                card = cards.pop(0)
+                tableauColumns[i].push(card)
+                dictionary.AddtoTableauDict(f"column{i+1}", card)
                 
     else:
         print("no cards to prepare")
@@ -182,8 +198,11 @@ def PrepareGame(cards, stockPile, tableauColumns):
     for i in range(len(cards)):
         stockPile.enqueue(cards.pop(0))
 
+# theory is that i select a card and the destination card i will check at which place destination card is present using hashmap iwll use that info to append the incoming card label at the end of the destination column
 
-
+# second approach added it to stack of that column then update
+# but find column using hashmap
+# def moveCards(col):
 
 
 # initialize the application

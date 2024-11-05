@@ -2,6 +2,8 @@ class Node:
     def __init__(self, card):
         self.card = card
         self.next = None
+    def getCard(self):
+        return self.card
 
 class TableauPile:
     def __init__(self):
@@ -30,7 +32,7 @@ class TableauPile:
         return None
 
     def checkNext(self):
-        return self.getSize() is 0  # If head is None, return True
+        return self.getSize() == 0  # If head is None, return True
 
     def getSize(self):
         count = 0

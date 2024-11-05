@@ -20,6 +20,10 @@ class Dictionaries:
 
         self.cardState = {}
 
+
+    def getTableau(self):
+        return self.tableau
+
     def AddtoTableauDict(self, column, card):
         if column in self.tableau:
             self.tableau[column].append(card)
