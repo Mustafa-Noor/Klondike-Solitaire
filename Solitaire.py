@@ -7,6 +7,7 @@ import sys
 from CardClass import InitializeDeck, ShuffleCards
 from stockpile import StockPileClass
 from Tableau import TableauPile
+from TableauColumn import TableauColumnClass
 import random
 
 
@@ -25,6 +26,7 @@ class UI(QMainWindow):
         self.tableauColumns = [TableauPile() for i in range(7)]
 
         PrepareGame(self.cards,self.stockPile, self.tableauColumns)
+
         self.updateTableau()
 
 
@@ -34,8 +36,6 @@ class UI(QMainWindow):
         self.tableauTable = []  
 
 
-
-        
 
         self.stockLabel = self.findChild(QLabel, "Stockpile")
         self.CardFromStock = self.findChild(QLabel, "CardFromStock")
@@ -52,15 +52,17 @@ class UI(QMainWindow):
         self.ClubsPile.mousePressEvent = lambda event: self.clicker("clubs")
         self.DiamondsPile.mousePressEvent = lambda event: self.clicker("diamonds")
 
+        
         self.initializeTableauLabels()
-
 
         self.show()
 
     def initializeTableauLabels(self):
-        """Initialize tableau labels for selecting cards."""
         for i in range(7):
-            for cardNo in range(self.tableauColumns[i].getSize()):  # Use the actual number of cards per column
+            current = self.tableauColumns[i].head  # Start from the head of the linked list
+            cardNo = 0
+
+            while current is not None:  # Traverse until the end of the linked list
                 label = self.findChild(QLabel, f"column{i+1}_label_{cardNo}")
                 if label is not None:
                     print(f"Label column{i+1}_label_{cardNo} found!")
@@ -69,8 +71,11 @@ class UI(QMainWindow):
                 else:
                     print(f"Label column{i+1}_label_{cardNo} not found!")
 
+                current = current.next  # Move to the next card
+                cardNo += 1
+
+
     def checkClick(self, label):
-        # Reset previously selected label
         if self.selectedCard is not None:
             self.selectedCard.setStyleSheet("")  # Reset style
             self.selectedCard.update()
@@ -92,7 +97,7 @@ class UI(QMainWindow):
         for i, tableau in enumerate(self.tableauColumns):
             columnLabel = self.findChild(QLabel, f"column{i+1}")
 
-            # Check if columnLabel exists
+            
             if columnLabel is None:
                 print(f"Column {i+1} QLabel not found!")
                 continue
@@ -102,23 +107,23 @@ class UI(QMainWindow):
             width = columnLabel.width()
             height = columnLabel.height()
 
-            
+            cardNo = 0
+            current = tableau.head  # Start from the head of the linked list
 
-            current = tableau.head
-            cardNo = 0 
-            while current:
-                
+            while current is not None:  # Traverse the linked list
+                card = current.card  # Get the card from the current node
                 label = QLabel(columnLabel.parent())
                 label.setObjectName(f"column{i+1}_label_{cardNo}")
-                if current.next is None:
-                    current.card.flipCard()
-                setImage(label, current.card.getCardImage())
-                label.setGeometry(xGeometry, yGeometry+(yOffset*cardNo), width, height)
+
+                if current.next is None:  # If the tableau is empty after popping, flip the card
+                    card.flipCard()
+
+                setImage(label, card.getCardImage())
+                label.setGeometry(xGeometry, yGeometry + (yOffset * cardNo), width, height)
                 label.setScaledContents(True)
                 label.show()
 
-                current = current.next
-                
+                current = current.next  # Move to the next node
                 cardNo += 1
 
 
@@ -165,9 +170,13 @@ def removeImage(label):
 def PrepareGame(cards, stockPile, tableauColumns):
 
     #prepare the tableau columns
-    for i in range(7):
-        for j in range(i+1):
-            tableauColumns[i].push(cards.pop(0))
+    if cards: 
+        for i in range(7):
+            for j in range(i+1):
+                tableauColumns[i].push(cards.pop(0))
+                
+    else:
+        print("no cards to prepare")
 
     # prepare the stockpile
     for i in range(len(cards)):
