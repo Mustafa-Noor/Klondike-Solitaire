@@ -83,6 +83,15 @@ class Card:
         else:
             return f"SuitsImages/back.jpeg"
 
+    def getState(self):
+        if self.isFaceUp:
+            return "Face-Up"
+        else:
+            return "Face-Down"
+
+    def getCardDetail(self):
+        return f"{checkRank(self.rank)}_of_{self.suit.lower()}"
+
 
 cards = []
 
