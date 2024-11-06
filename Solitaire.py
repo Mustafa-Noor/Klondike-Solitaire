@@ -35,8 +35,9 @@ class UI(QMainWindow):
         
         
 
-        self.selectedCard = None  
+        self.selectedCards = []
         self.tableauTable = []  
+        
 
 
 
@@ -81,16 +82,25 @@ class UI(QMainWindow):
 
 
     def checkClick(self, label):
-        if self.selectedCard is not None:
-            self.selectedCard.setStyleSheet("")  # Reset style
-            self.selectedCard.update()
+        # If the label is already selected, deselect it
+        if label in self.selectedCards:
+            self.selectedCards.remove(label)
+            label.setStyleSheet("")  # Reset style
+            label.update()
+        else:
+            # If two cards are already selected, don't allow selection of more
+            if len(self.selectedCards) < 2:
+                self.selectedCards.append(label)  # Add to selected cards
+                label.setStyleSheet("border: 2px solid black; padding: 5px;")
+                label.update()
+            else:
+                print("Maximum of two cards can be selected.")
 
-        # Set the new selected label
-        self.selectedCard = label
+        # Debugging output
         column = extractColumn(label.objectName())
-        label.setStyleSheet("border: 2px solid black; padding: 5px;")
-        label.update()
-        print(column)
+        print(f"Selected column: {column}")
+        print(f"Currently selected cards: {len(self.selectedCards)}")
+
 
 
         
