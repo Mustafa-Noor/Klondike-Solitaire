@@ -20,6 +20,8 @@ class UI(QMainWindow):
 
         uic.loadUi("SolitaireUI.ui", self)
 
+        self.firstInit = True
+
         self.cards = InitializeDeck()
         print(len(self.cards))
         self.stockPile = StockPileClass()
@@ -32,10 +34,12 @@ class UI(QMainWindow):
 
         self.updateTableau()
 
+
         
         
 
-        self.selectedCards = []
+        self.firstSelected = None
+        self.secondSelected = None
         self.tableauTable = []  
         
 
@@ -65,10 +69,10 @@ class UI(QMainWindow):
 
     def initializeTableauLabels(self):
         for i in range(7):
-            current = self.tableauColumns[i].head  # Start from the head of the linked list
+            current = self.tableauColumns[i].head  
             cardNo = 0
 
-            while current is not None:  # Traverse until the end of the linked list
+            while current is not None:  
                 label = self.findChild(QLabel, f"column{i+1}_label_{cardNo}")
                 if label is not None:
                     print(f"Label column{i+1}_label_{cardNo} found!")
@@ -77,33 +81,42 @@ class UI(QMainWindow):
                 else:
                     print(f"Label column{i+1}_label_{cardNo} not found!")
 
-                current = current.next  # Move to the next card
+                current = current.next  
                 cardNo += 1
 
 
     def checkClick(self, label):
-        # If the label is already selected, deselect it
-        if label in self.selectedCards:
-            self.selectedCards.remove(label)
-            label.setStyleSheet("")  # Reset style
-            label.update()
+
+        if self.firstSelected is None:
+            self.firstSelected = label
+            self.firstSelected.setStyleSheet("border: 2px solid black; padding: 5px;")
+            self.firstSelected.update()
         else:
-            # If two cards are already selected, don't allow selection of more
-            if len(self.selectedCards) < 2:
-                self.selectedCards.append(label)  # Add to selected cards
-                label.setStyleSheet("border: 2px solid black; padding: 5px;")
-                label.update()
-            else:
-                print("Maximum of two cards can be selected.")
+            self.secondSelected = label
+            self.secondSelected.setStyleSheet("border: 2px solid black; padding: 5px;")
+            self.secondSelected.update()
+            self.firstSelected.setStyleSheet("")  
+            self.firstSelected.update()
+            self.tryingMovement(self.firstSelected, self.secondSelected)
+            self.firstSelected = None
 
-        # Debugging output
-        column = extractColumn(label.objectName())
-        print(f"Selected column: {column}")
-        print(f"Currently selected cards: {len(self.selectedCards)}")
+        if self.secondSelected is not None:
+            self.secondSelected.setStyleSheet("")  
+            self.secondSelected.update()
+            self.secondSelected = None
 
+    def tryingMovement(self, labelSource, labelDes):
+        columnSource = extractColumn(labelSource.objectName())
+        columnDes = extractColumn(labelDes.objectName())
+        print("source column:" , columnSource)
+        print(columnDes)
+        card = self.tableauColumns[extractColumnNumber(columnSource)-1].pop()
+        self.tableauColumns[extractColumnNumber(columnDes)-1].push(card)
+        labelSource.clear()
+        labelSource.update()
 
-
-        
+        self.updateTableau()
+        self.initializeTableauLabels()
 
 
     def clicker(self, sen):
@@ -125,42 +138,42 @@ class UI(QMainWindow):
             height = columnLabel.height()
 
             cardNo = 0
-            current = tableau.head  # Start from the head of the linked list
+            current = tableau.head  
 
-            while current is not None:  # Traverse the linked list
-                card = current.card  # Get the card from the current node
+            while current is not None:  
+                card = current.card 
                 label = QLabel(columnLabel.parent())
                 label.setObjectName(f"column{i+1}_label_{cardNo}")
 
-                if current.next is None:  
-                    card.flipCard()
-
-                # Debugging print to check if each card is set correctly
-                print(f"Setting image for {label.objectName()}")
-
+                if current.next is None: 
+                    print("i did flip the card")
+                    if self.firstInit: 
+                        card.flipCard()
+                        
+                    print(card.getCardImage())
                 setImage(label, card.getCardImage())
                 label.setGeometry(xGeometry, yGeometry + (yOffset * cardNo), width, height)
                 label.setScaledContents(True)
                 label.show()
 
-                current = current.next  # Move to the next node
+                current = current.next 
                 cardNo += 1
 
+        self.firstInit = False
 
 
     def HandleStockPile(self):
-            
-            card = handleDequeue(self.stockPile, self.wastePile)
-            if card is None:
-                removeImage(self.CardFromStock)
-                requeueCards(self.stockPile, self.wastePile)
-                setImage(self.stockLabel,"SuitsImages/back.jpeg")
-                return
+        card = handleDequeue(self.stockPile, self.wastePile)
+        if card is None:
+            removeImage(self.CardFromStock)
+            requeueCards(self.stockPile, self.wastePile)
+            setImage(self.stockLabel,"SuitsImages/back.jpeg")
+            return
+    
+        setImage(self.CardFromStock, card.cardImage)
         
-            setImage(self.CardFromStock, card.cardImage)
-            
-            if self.stockPile.peek() is None:
-                removeImage(self.stockLabel)
+        if self.stockPile.peek() is None:
+            removeImage(self.stockLabel)
 
 
 def handleDequeue(stockPile, wastePile):
@@ -179,6 +192,11 @@ def requeueCards(stockPile, wastePile):
 
 def extractColumn(sen):
     return sen.split('_')[0]
+
+def extractColumnNumber(sen):
+    return int(sen[6])
+
+
 
 
 def setImage(label, imageAddress):
@@ -213,6 +231,7 @@ def PrepareGame(cards, stockPile, tableauColumns, dictionary):
 # second approach added it to stack of that column then update
 # but find column using hashmap
 # def moveCards(col):
+
 
 
 # initialize the application

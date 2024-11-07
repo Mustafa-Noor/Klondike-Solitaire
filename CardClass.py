@@ -72,13 +72,11 @@ class Card:
     def flipCard(self):
         if not self.isFaceUp:
             self.isFaceUp = True
-            self.cardImage = f"CardImages/{checkRank(self.rank)}_of_{self.suit.lower()}.png"
         else:
             self.isFaceUp = False
-            self.cardImage = f"SuitsImages/back.jpeg"
-
+            
     def getCardImage(self):
-        if self.isFaceUp:
+        if self.isFaceUp is True:
             return f"CardImages/{checkRank(self.rank)}_of_{self.suit.lower()}.png"
         else:
             return f"SuitsImages/back.jpeg"

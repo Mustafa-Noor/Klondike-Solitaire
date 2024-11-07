@@ -2,6 +2,7 @@ class Node:
     def __init__(self, card):
         self.card = card
         self.next = None
+        
     def getCard(self):
         return self.card
 
@@ -25,14 +26,14 @@ class TableauPile:
     def pop(self):
         if not self.isEmpty():
             card = self.head.card
-            self.head = self.head.next  # Move the head pointer to the next node
-            if self.head is None:  # If the stack is now empty, reset top
+            self.head = self.head.next  
+            if self.head is None:  
                 self.top = None
             return card
         return None
 
     def checkNext(self):
-        return self.getSize() == 0  # If head is None, return True
+        return self.getSize() == 1
 
     def getSize(self):
         count = 0
