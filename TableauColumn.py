@@ -23,6 +23,13 @@ class TableauColumnClass:
             return card
         return None
 
+    def peak(self):
+        if not self.isEmpty():
+            card = self.data[self.top]
+            return card
+        return None
+
+
     def checkNext(self):
         if self.top == -1:
             return True
@@ -30,7 +37,7 @@ class TableauColumnClass:
 
 
     def getSize(self):
-        return len(self.data)
+        return self.top+1
 
 
 

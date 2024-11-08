@@ -8,6 +8,7 @@ from CardClass import InitializeDeck, ShuffleCards
 from stockpile import StockPileClass
 from Tableau import TableauPile
 from TableauColumn import TableauColumnClass
+from LinkedList import LinkedListCards
 from Dictionary import Dictionaries
 import random
 
@@ -26,17 +27,16 @@ class UI(QMainWindow):
         print(len(self.cards))
         self.stockPile = StockPileClass()
         self.wastePile = StockPileClass()
-        self.tableauColumns = [TableauPile() for i in range(7)]
+        self.tableauColumns = [TableauColumnClass() for i in range(7)]
+        self.LinkedList = [LinkedListCards() for i in range(7)]
 
         self.dictionary = Dictionaries()
 
-        PrepareGame(self.cards,self.stockPile, self.tableauColumns, self.dictionary)
+        PrepareGame(self.cards,self.stockPile, self.tableauColumns, self.dictionary, self.LinkedList)
 
+        
         self.updateTableau()
 
-
-        
-        
 
         self.firstSelected = None
         self.secondSelected = None
@@ -68,11 +68,9 @@ class UI(QMainWindow):
         self.show()
 
     def initializeTableauLabels(self):
+        self.tableauTable.clear()
         for i in range(7):
-            current = self.tableauColumns[i].head  
-            cardNo = 0
-
-            while current is not None:  
+            for cardNo in range(self.tableauColumns[i].getSize()+self.LinkedList[i].getSize()):  # Use the actual number of cards per column
                 label = self.findChild(QLabel, f"column{i+1}_label_{cardNo}")
                 if label is not None:
                     print(f"Label column{i+1}_label_{cardNo} found!")
@@ -80,9 +78,9 @@ class UI(QMainWindow):
                     label.mousePressEvent = lambda event, lbl=label: self.checkClick(lbl)
                 else:
                     print(f"Label column{i+1}_label_{cardNo} not found!")
+            
 
-                current = current.next  
-                cardNo += 1
+
 
 
     def checkClick(self, label):
@@ -111,9 +109,10 @@ class UI(QMainWindow):
         print("source column:" , columnSource)
         print(columnDes)
         card = self.tableauColumns[extractColumnNumber(columnSource)-1].pop()
-        self.tableauColumns[extractColumnNumber(columnDes)-1].push(card)
+        self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
+        # self.tableauColumns[extractColumnNumber(columnDes)-1].push(card)
         labelSource.clear()
-        labelSource.update()
+        labelSource.hide()
 
         self.updateTableau()
         self.initializeTableauLabels()
@@ -123,11 +122,9 @@ class UI(QMainWindow):
         print(sen)
 
     def updateTableau(self):
-        yOffset = 50  
-
+        yOffset = 50
         for i, tableau in enumerate(self.tableauColumns):
             columnLabel = self.findChild(QLabel, f"column{i+1}")
-
             if columnLabel is None:
                 print(f"Column {i+1} QLabel not found!")
                 continue
@@ -137,30 +134,61 @@ class UI(QMainWindow):
             width = columnLabel.width()
             height = columnLabel.height()
 
-            cardNo = 0
-            current = tableau.head  
+            # Get the sizes of the tableau column and corresponding LinkedList
+            tableauSize = tableau.getSize()
+            linkedListSize = self.LinkedList[i].getSize()
+            print(f"Tableau size: {tableauSize}, LinkedList size: {linkedListSize}")
 
-            while current is not None:  
-                card = current.card 
-                label = QLabel(columnLabel.parent())
-                label.setObjectName(f"column{i+1}_label_{cardNo}")
+            # Display all cards in the tableau, hiding intermediate cards
+            for j in range(tableauSize):
+                if j < tableauSize - 1 - linkedListSize:  # Back face for non-visible cards
+                    cardImage = "SuitsImages/back.jpeg"
+                else:  
+                    # card = tableau.peak()
+                    # card.isFaceUp = True
+                    cardImage = card.getCardImage()
 
-                if current.next is None: 
-                    print("i did flip the card")
-                    if self.firstInit: 
-                        card.flipCard()
-                        
-                    print(card.getCardImage())
-                setImage(label, card.getCardImage())
-                label.setGeometry(xGeometry, yGeometry + (yOffset * cardNo), width, height)
+                
+                label = self.findChild(QLabel, f"column{i+1}_label_{j}")
+                if label is None:
+                    label = QLabel(columnLabel.parent())
+                    label.setObjectName(f"column{i+1}_label_{j}")
+                setImage(label, cardImage)
+                label.setGeometry(xGeometry, yGeometry + (yOffset * j), width, height)
                 label.setScaledContents(True)
                 label.show()
 
-                current = current.next 
-                cardNo += 1
+            # Display cards in LinkedList if it has additional cards for this column
+            currentNode = self.LinkedList[i].head
+            for k in range(linkedListSize):
+                if currentNode is None:
+                    break
+                # Set card to face up and get its image
+                currentNode.card.isFaceUp = True
+                cardImage = currentNode.card.getCardImage()
 
-        self.firstInit = False
+                # Create or update QLabel for this LinkedList card
+                label = self.findChild(QLabel, f"column{i+1}_label_{tableauSize + k}")
+                if label is None:
+                    label = QLabel(columnLabel.parent())
+                    label.setObjectName(f"column{i+1}_label_{tableauSize + k}")
+                setImage(label, cardImage)
+                label.setGeometry(xGeometry, yGeometry + (yOffset * (tableauSize + k)), width, height)
+                label.setScaledContents(True)
+                label.show()
 
+                # Move to the next node in the LinkedList
+                currentNode = currentNode.next
+
+
+
+        
+
+
+
+    def AddCardInColumnList(self, columnNumber, card):
+        self.LinkedList[columnNumber].AddCard(card)
+        print("added in linked list")
 
     def HandleStockPile(self):
         card = handleDequeue(self.stockPile, self.wastePile)
@@ -199,6 +227,7 @@ def extractColumnNumber(sen):
 
 
 
+
 def setImage(label, imageAddress):
     pixmap = QPixmap(imageAddress)
     label.setPixmap(pixmap)
@@ -208,16 +237,21 @@ def setImage(label, imageAddress):
 def removeImage(label):
     label.clear()
 
-
-def PrepareGame(cards, stockPile, tableauColumns, dictionary):
+def giveBackImage():
+    return f"SuitsImages/back.jpeg"
+    
+def PrepareGame(cards, stockPile, tableauColumns, dictionary, LinkedList):
 
     #prepare the tableau columns
     if cards: 
         for i in range(7):
             for j in range(i+1):
                 card = cards.pop(0)
-                tableauColumns[i].push(card)
-                dictionary.AddtoTableauDict(f"column{i+1}", card)
+                if j == i:
+                    LinkedList[i].AddCard(card)
+                else:
+                    tableauColumns[i].push(card)
+                    dictionary.AddtoTableauDict(f"column{i+1}", card)
                 
     else:
         print("no cards to prepare")

@@ -32,6 +32,12 @@ class TableauPile:
             return card
         return None
 
+    def peak(self):
+        if not self.isEmpty():
+            card = self.head.card
+            return card
+        return None
+
     def checkNext(self):
         return self.getSize() == 1
 
