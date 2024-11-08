@@ -6,6 +6,7 @@ import sys
 
 from CardClass import InitializeDeck, ShuffleCards
 from stockpile import StockPileClass
+from FoundationStack import Stack
 from Tableau import TableauPile
 from TableauColumn import TableauColumnClass
 from LinkedList import LinkedListCards
@@ -21,12 +22,11 @@ class UI(QMainWindow):
 
         uic.loadUi("SolitaireUI.ui", self)
 
-        self.firstInit = True
 
         self.cards = InitializeDeck()
         print(len(self.cards))
         self.stockPile = StockPileClass()
-        self.wastePile = StockPileClass()
+        self.wastePile = Stack()
         self.tableauColumns = [TableauColumnClass() for i in range(7)]
         self.LinkedList = [LinkedListCards() for i in range(7)]
 
@@ -40,6 +40,7 @@ class UI(QMainWindow):
 
         self.firstSelected = None
         self.secondSelected = None
+        self.currentStockCard = None
         self.tableauTable = []  
         
 
@@ -104,10 +105,17 @@ class UI(QMainWindow):
         print("source column:" , columnSource)
         print("destination column:", columnDes)
 
-        card = self.removeCardLast(extractColumnNumber(columnSource)-1)
-
-        if card is not None:
-            self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
+        if labelSource.objectName() == "CardFromStock":
+            card = self.currentStockCard
+            print("made it here but..")
+            if card is not None:
+                print("maybe")
+                self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
+                self.HandleWastePile()
+        else:
+            card = self.removeCardLast(extractColumnNumber(columnSource)-1)
+            if card is not None:
+                self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
         # self.tableauColumns[extractColumnNumber(columnDes)-1].push(card)
             if self.LinkedList[extractColumnNumber(columnSource)-1].getSize() == 0:
                 self.moveCardFromStackToList(extractColumnNumber(columnSource)-1)
@@ -216,6 +224,7 @@ class UI(QMainWindow):
 
     def HandleStockPile(self):
         card = handleDequeue(self.stockPile, self.wastePile)
+        
         if card is None:
             removeImage(self.CardFromStock)
             requeueCards(self.stockPile, self.wastePile)
@@ -223,21 +232,43 @@ class UI(QMainWindow):
             return
     
         setImage(self.CardFromStock, card.cardImage)
+        self.currentStockCard = card
         
         if self.stockPile.peek() is None:
             removeImage(self.stockLabel)
+
+    def peakFromWaste(self):
+        return self.wastePile.peak()
+
+    def updateWastePile(self):
+        self.wastePile.pop()
+        card = self.wastePile.peak()
+        
+        if card is not None:
+            card.isFaceUp = True
+            setImage(self.CardFromStock, card.getCardImage())
+            self.currentStockCard = card
+        else: 
+            removeImage(self.CardFromStock)
+            self.currentStockCard = None
+
+    def HandleWastePile(self):
+        self.currentStockCard = self.peakFromWaste()
+        self.updateWastePile()
 
 
 def handleDequeue(stockPile, wastePile):
     card = stockPile.dequeue()
     if card:
-        wastePile.enqueue(card)
+        wastePile.push(card)
     return card
+
+
 
 def requeueCards(stockPile, wastePile):
     cards = []
     while not wastePile.isEmpty():
-        cards.append(wastePile.dequeue())
+        cards.append(wastePile.pop())
     
     cards = ShuffleCards(cards)
     stockPile.reQueue(cards)

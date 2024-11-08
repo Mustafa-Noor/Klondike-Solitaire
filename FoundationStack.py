@@ -1,18 +1,33 @@
-class FoundationStack:
-    def _init_(self):
-        self.cards = []  
+class Stack:
+    def __init__(self):
+        self.data = []
+        self.top = -1
 
-    def push(self, card):
-        self.cards.append(card) 
+    def push(self,card):
+        self.top += 1
+        if(self.top>=len(self.data)):
+            self.data.append(card)
+        else:
+            self.data[self.top] = card
+
+    def isEmpty(self):
+        if self.top == -1:
+            return True
+        else:
+            return False
 
     def pop(self):
-        return self.cards.pop() if self.cards else None 
+        if not self.isEmpty():
+            card = self.data[self.top]
+            self.top -= 1
+            return card
+        return None
 
-    def peek(self):
-        return self.cards[-1] if self.cards else None  
+    def peak(self):
+        if not self.isEmpty():
+            card = self.data[self.top]
+            return card
+        return None
 
-    def is_empty(self):
-        return len(self.cards) == 0
-
-    def display(self):
-        return " | ".join(str(card) for card in reversed(self.cards))  
+    def getSize(self):
+        return self.top+1
