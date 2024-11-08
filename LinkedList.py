@@ -13,13 +13,30 @@ class LinkedListCards:
         newNode = Node(card)
         if self.head is None:
             self.head = newNode
-            return
+        else:
+            temp = self.head
+            while(temp.next != None):
+                temp = temp.next    
+            temp.next = newNode
+            
+
+    def removeCardFromLast(self):
+        if self.head is None:
+            return None
+        
+        if self.head.next is None:
+            removedCard = self.head.card
+            self.head = None  
+            return removedCard
 
         temp = self.head
-        while(temp.next != None):
-            temp = temp.next    
+        while(temp.next.next != None):
+            temp = temp.next
+        
+        removedCard = temp.next.card
+        temp.next = None
+        return removedCard
 
-        temp.next = newNode
     
     def getSize(self):
         count = 0
@@ -29,3 +46,5 @@ class LinkedListCards:
             current = current.next
         return count
     
+    def isEmpty(self):
+        return self.head == None
