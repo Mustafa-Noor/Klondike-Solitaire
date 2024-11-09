@@ -37,6 +37,21 @@ class LinkedListCards:
         temp.next = None
         return removedCard
 
+    def peakLast(self):
+        if self.head is None:
+            return None
+        
+        if self.head.next is None:
+            removedCard = self.head.card
+            return removedCard
+
+        temp = self.head
+        while(temp.next.next != None):
+            temp = temp.next
+        
+        removedCard = temp.next.card
+        return removedCard
+
     
     def getSize(self):
         count = 0

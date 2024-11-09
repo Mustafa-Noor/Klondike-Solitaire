@@ -29,6 +29,12 @@ class UI(QMainWindow):
         self.wastePile = Stack()
         self.tableauColumns = [TableauColumnClass() for i in range(7)]
         self.LinkedList = [LinkedListCards() for i in range(7)]
+       
+
+        self.foundationSpades = Stack()
+        self.foundationHearts = Stack()
+        self.foundationClubs = Stack()
+        self.foundationDiamonds = Stack()
 
         self.dictionary = Dictionaries()
 
@@ -56,10 +62,10 @@ class UI(QMainWindow):
 
         self.stockLabel.mousePressEvent = lambda event: self.HandleStockPile()
         self.CardFromStock.mousePressEvent = lambda event: self.checkClick(self.CardFromStock)
-        self.SpadesPile.mousePressEvent = lambda event: self.clicker("spades")
-        self.HeartsPile.mousePressEvent = lambda event: self.clicker("hearts")
-        self.ClubsPile.mousePressEvent = lambda event: self.clicker("clubs")
-        self.DiamondsPile.mousePressEvent = lambda event: self.clicker("diamonds")
+        self.SpadesPile.mousePressEvent = lambda event: self.checkClick(self.SpadesPile)
+        self.HeartsPile.mousePressEvent = lambda event: self.checkClick(self.HeartsPile)
+        self.ClubsPile.mousePressEvent = lambda event: self.checkClick(self.ClubsPile)
+        self.DiamondsPile.mousePressEvent = lambda event: self.checkClick(self.DiamondsPile)
 
         
 
@@ -107,18 +113,48 @@ class UI(QMainWindow):
 
         if labelSource.objectName() == "CardFromStock":
             card = self.currentStockCard
-            print("made it here but..")
             if card is not None:
-                print("maybe")
-                self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
-                self.HandleWastePile()
+                cardDes = self.LinkedList[extractColumnNumber(columnDes)-1].peakLast()
+                if self.checkValidMove(card, cardDes):
+                    self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
+                    self.HandleWastePile()
+                    self.dictionary.AddtoTableauDict(f"column{columnDes}", card)
+                else:
+                    removeBorder(self.firstSelected)
+                    self.firstSelected = None
+                    removeBorder(self.secondSelected)
+                    self.secondSelected = None
+
+        elif labelDes.objectName() == "spadesPile":
+            card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
+            if card is not None:
+                self.foundationSpades.push(card)
+                setImage(self.SpadesPile, card.getCardImage())
+                card = self.LinkedList[extractColumnNumber(columnSource)-1].removeCardFromLast()
+                print(card.getCardDetail())
+                self.dictionary.RemoveFromTableauDict(f"column{columnSource}", card)
+
+
         else:
-            card = self.removeCardLast(extractColumnNumber(columnSource)-1)
+            card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
             if card is not None:
-                self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
+                cardDes = self.LinkedList[extractColumnNumber(columnDes)-1].peakLast()
+                if self.checkValidMove(card, cardDes):
+                    self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
+                    self.dictionary.AddtoTableauDict(f"column{columnDes}", card)
+                    card = self.LinkedList[extractColumnNumber(columnSource)-1].removeCardFromLast()
+                    self.dictionary.RemoveFromTableauDict(f"column{columnSource}", card)
+
+                else:
+                    removeBorder(self.firstSelected)
+                    self.firstSelected = None
+                    removeBorder(self.secondSelected)
+                    self.secondSelected = None
         # self.tableauColumns[extractColumnNumber(columnDes)-1].push(card)
-            if self.LinkedList[extractColumnNumber(columnSource)-1].getSize() == 0:
-                self.moveCardFromStackToList(extractColumnNumber(columnSource)-1)
+        if self.LinkedList[extractColumnNumber(columnSource)-1].getSize() == 0:
+            self.moveCardFromStackToList(extractColumnNumber(columnSource)-1)
+            self.dictionary.RemoveFromTableauDict(f"column{columnSource}", card)
+                
                 
             labelSource.clear()
             labelSource.hide()
@@ -256,6 +292,15 @@ class UI(QMainWindow):
         self.currentStockCard = self.peakFromWaste()
         self.updateWastePile()
 
+    def checkValidMove(self,card1, card2):
+        if validateRank(card1.rank) != validateRank(card2.rank)-1:
+            return False
+
+        if self.dictionary.colourMap[card1.suit.lower()] == self.dictionary.colourMap[card2.suit.lower()]:
+            return False
+        
+        return True
+
 
 def handleDequeue(stockPile, wastePile):
     card = stockPile.dequeue()
@@ -300,6 +345,22 @@ def giveBorder(label):
 def removeBorder(label):
     label.setStyleSheet("")
     label.update()
+
+
+
+
+def validateRank(rank):
+    if rank == "ace":
+        return 1
+    elif rank == "jack":
+        return 11
+    elif  rank == "queen":
+        return 12
+    elif rank == "king":
+        return 13
+    else:
+        return int(rank)    
+
 
     
 def PrepareGame(cards, stockPile, tableauColumns, dictionary, LinkedList):
