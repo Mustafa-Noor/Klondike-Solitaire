@@ -26,8 +26,11 @@
       <height>201</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">border: 2px solid grey; padding: 5px;</string>
+    </property>
     <property name="text">
-     <string/>
+     <string>          Spades</string>
     </property>
     <property name="pixmap">
      <pixmap>SuitsImages/Spades.jpg</pixmap>
@@ -45,8 +48,11 @@
       <height>201</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">border: 2px solid grey; padding: 5px;</string>
+    </property>
     <property name="text">
-     <string/>
+     <string>         Hearts</string>
     </property>
     <property name="pixmap">
      <pixmap>SuitsImages/Hearts.jpg</pixmap>
@@ -64,8 +70,11 @@
       <height>201</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">border: 2px solid grey; padding: 5px;</string>
+    </property>
     <property name="text">
-     <string/>
+     <string>           Clubs</string>
     </property>
     <property name="pixmap">
      <pixmap>SuitsImages/Clubs.jpg</pixmap>
@@ -83,8 +92,11 @@
       <height>201</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">border: 2px solid grey; padding: 5px;</string>
+    </property>
     <property name="text">
-     <string/>
+     <string>       Diamonds</string>
     </property>
     <property name="pixmap">
      <pixmap>SuitsImages/Diamonds.jpg</pixmap>
