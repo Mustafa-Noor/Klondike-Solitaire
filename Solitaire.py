@@ -111,31 +111,94 @@ class UI(QMainWindow):
         print("source column:" , columnSource)
         print("destination column:", columnDes)
 
-        if labelSource.objectName() == "CardFromStock":
+        if labelSource.objectName() == labelDes.objectName():
+            return
+            
+        if labelSource.objectName() == "CardFromStock" and not checkDestination(labelDes.objectName()):
             card = self.currentStockCard
             if card is not None:
                 cardDes = self.LinkedList[extractColumnNumber(columnDes)-1].peakLast()
                 if self.checkValidMove(card, cardDes):
-                    self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
-                    self.HandleWastePile()
-                    self.dictionary.AddtoTableauDict(f"column{columnDes}", card)
+                    self.moveFromStockToColumn(columnDes, card)
                 else:
-                    removeBorder(self.firstSelected)
-                    self.firstSelected = None
-                    removeBorder(self.secondSelected)
-                    self.secondSelected = None
+                    self.deselectCards()
 
         elif labelDes.objectName() == "spadesPile":
-            card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
-            if card is not None:
-                self.foundationSpades.push(card)
-                setImage(self.SpadesPile, card.getCardImage())
-                card = self.LinkedList[extractColumnNumber(columnSource)-1].removeCardFromLast()
-                print(card.getCardDetail())
-                self.dictionary.RemoveFromTableauDict(f"column{columnSource}", card)
+            if labelSource.objectName() == "CardFromStock":
+                card = self.currentStockCard
+                if card is not None:
+                    if self.checkForSpadesFoundation(card):
+                        self.foundationSpades.push(card)
+                        card.flipCard()
+                        self.HandleWastePile()
+                        setImage(self.SpadesPile, card.getCardImage())
+            else:
+                card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
+                if card is not None:
+                    if self.checkForSpadesFoundation(card):
+                        self.foundationSpades.push(card)
+                        self.movefromColToFoundation(self.SpadesPile, columnSource, card)
+                    else:
+                        print("card not according to spade foundation criteria")
+
+        elif labelDes.objectName() == "heartsPile":
+            if labelSource.objectName() == "CardFromStock":
+                card = self.currentStockCard
+                if card is not None:
+                    if self.checkForHeartsFoundation(card):
+                        self.foundationHearts.push(card)
+                        card.flipCard()
+                        self.HandleWastePile()
+                        setImage(self.HeartsPile, card.getCardImage())
+            else:
+                card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
+                if card is not None:
+                    if self.checkForHeartsFoundation(card):
+                        self.foundationHearts.push(card)
+                        self.movefromColToFoundation(self.HeartsPile, columnSource, card)
+                    else:
+                        print("card not according to hearts foundation criteria")
+
+        elif labelDes.objectName() == "clubsPile":
+            if labelSource.objectName() == "CardFromStock":
+                card = self.currentStockCard
+                if card is not None:
+                    if self.checkForClubsFoundation(card):
+                        self.foundationClubs.push(card)
+                        card.flipCard()
+                        self.HandleWastePile()
+                        setImage(self.ClubsPile, card.getCardImage())
+            else:
+                card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
+                if card is not None:
+                    if self.checkForClubsFoundation(card):
+                        self.foundationClubs.push(card)
+                        self.movefromColToFoundation(self.ClubsPile, columnSource, card)
+                    else:
+                        print("card not according to clubs foundation criteria")
 
 
-        else:
+        elif labelDes.objectName() == "diamondsPile":
+            if labelSource.objectName() == "CardFromStock":
+                card = self.currentStockCard
+                if card is not None:
+                    if self.checkForDiamondsFoundation(card):
+                        self.foundationDiamonds.push(card)
+                        card.flipCard()
+                        self.HandleWastePile()
+                        setImage(self.DiamondsPile, card.getCardImage())
+            else:
+                card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
+                if card is not None:
+                    if self.checkForDiamondsFoundation(card):
+                        self.foundationDiamonds.push(card)
+                        self.movefromColToFoundation(self.DiamondsPile, columnSource, card)
+                    else:
+                        print("card not according to diamonds foundation criteria")
+
+
+
+        elif checkForColToCol(labelSource, labelDes):
             card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
             if card is not None:
                 cardDes = self.LinkedList[extractColumnNumber(columnDes)-1].peakLast()
@@ -150,10 +213,11 @@ class UI(QMainWindow):
                     self.firstSelected = None
                     removeBorder(self.secondSelected)
                     self.secondSelected = None
+        if isColumnLabel(labelSource):
         # self.tableauColumns[extractColumnNumber(columnDes)-1].push(card)
-        if self.LinkedList[extractColumnNumber(columnSource)-1].getSize() == 0:
-            self.moveCardFromStackToList(extractColumnNumber(columnSource)-1)
-            self.dictionary.RemoveFromTableauDict(f"column{columnSource}", card)
+            if self.LinkedList[extractColumnNumber(columnSource)-1].getSize() == 0:
+                self.moveCardFromStackToList(extractColumnNumber(columnSource)-1)
+                self.dictionary.RemoveFromTableauDict(f"column{columnSource}", card)
                 
                 
             labelSource.clear()
@@ -230,12 +294,22 @@ class UI(QMainWindow):
 
 
 
+    def movefromColToFoundation(self, label, columnSource, card):
+        setImage(label, card.getCardImage())
+        card = self.LinkedList[extractColumnNumber(columnSource)-1].removeCardFromLast()
+        print(card.getCardDetail())
+        self.dictionary.RemoveFromTableauDict(f"column{columnSource}", card)
+
     def moveCardFromStackToList(self, column):
         if not self.tableauColumns[column].isEmpty():
             card = self.tableauColumns[column].pop()
             self.AddCardInColumnList(column, card)
         
 
+    def moveFromStockToColumn(self, columnDes, card):
+        self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
+        self.HandleWastePile()
+        self.dictionary.AddtoTableauDict(f"column{columnDes}", card)
 
 
     def AddCardInColumnList(self, columnNumber, card):
@@ -294,12 +368,74 @@ class UI(QMainWindow):
 
     def checkValidMove(self,card1, card2):
         if validateRank(card1.rank) != validateRank(card2.rank)-1:
+            print("not valid", card1.rank, "  ", card2.rank)
             return False
 
         if self.dictionary.colourMap[card1.suit.lower()] == self.dictionary.colourMap[card2.suit.lower()]:
+            print("not valid", card1.suit, "  ", card2.suit)
             return False
         
         return True
+
+    def checkForSpadesFoundation(self, card):
+        lastCard = self.foundationSpades.peak()
+        if lastCard is not None:
+            if card.suit.lower() == "spades" and validateRank(card.rank) == validateRank(lastCard.rank)+1:
+                return True
+        elif lastCard is None:
+            if card.suit.lower() == "spades" and validateRank(card.rank) == 1:
+                return True
+        else:
+            return False
+
+
+    def checkForHeartsFoundation(self, card):
+        lastCard = self.foundationHearts.peak()
+        if lastCard is not None:
+            if card.suit.lower() == "hearts" and validateRank(card.rank) == validateRank(lastCard.rank)+1:
+                return True
+        elif lastCard is None:
+            if card.suit.lower() == "hearts" and validateRank(card.rank) == 1:
+                return True
+        else:
+            return False
+
+    def checkForClubsFoundation(self, card):
+        lastCard = self.foundationClubs.peak()
+        if lastCard is not None:
+            if card.suit.lower() == "clubs" and validateRank(card.rank) == validateRank(lastCard.rank)+1:
+                return True
+        elif lastCard is None:
+            if card.suit.lower() == "clubs" and validateRank(card.rank) == 1:
+                return True
+        else:
+            return False
+
+
+    def checkForDiamondsFoundation(self, card):
+        lastCard = self.foundationDiamonds.peak()
+        if lastCard is not None:
+            if card.suit.lower() == "diamonds" and validateRank(card.rank) == validateRank(lastCard.rank)+1:
+                return True
+        elif lastCard is None:
+            if card.suit.lower() == "diamonds" and validateRank(card.rank) == 1:
+                return True
+        else:
+            return False
+
+
+
+    def deselectCards(self):
+        removeBorder(self.firstSelected)
+        self.firstSelected = None
+        removeBorder(self.secondSelected)
+        self.secondSelected = None
+
+def checkDestination(sen):
+    array = ["spadesPile", "heartsPile", "clubsPile", "diamondsPile"]
+    if sen in array:
+        return True
+    return False
 
 
 def handleDequeue(stockPile, wastePile):
@@ -308,6 +444,16 @@ def handleDequeue(stockPile, wastePile):
         wastePile.push(card)
     return card
 
+def checkForColToCol(labelSource, labelDes):
+    if isColumnLabel(labelSource) and isColumnLabel(labelDes):
+        print("condition was true")
+        return True
+    print("condition was false")
+    return False
+
+
+def isColumnLabel(label):
+    return label.objectName()[:6] == "column"
 
 
 def requeueCards(stockPile, wastePile):
@@ -347,10 +493,9 @@ def removeBorder(label):
     label.update()
 
 
-
-
 def validateRank(rank):
     if rank == "ace":
+       
         return 1
     elif rank == "jack":
         return 11
