@@ -47,6 +47,7 @@ class UI(QMainWindow):
         self.firstSelected = None
         self.secondSelected = None
         self.currentStockCard = None
+        self.currentFoundationCard = None
         self.tableauTable = []  
         
 
@@ -78,7 +79,7 @@ class UI(QMainWindow):
         self.tableauTable.clear()
         lastLabel = None
         for i in range(7):
-            for cardNo in range(self.tableauColumns[i].getSize()+self.LinkedList[i].getSize()):  # Use the actual number of cards per column
+            for cardNo in range(self.tableauColumns[i].getSize()+self.LinkedList[i].getSize()):  
                 label = self.findChild(QLabel, f"column{i+1}_label_{cardNo}")
                 if label is not None:
                     print(f"Label column{i+1}_label_{cardNo} found!")
@@ -112,8 +113,14 @@ class UI(QMainWindow):
         print("destination column:", columnDes)
 
         if labelSource.objectName() == labelDes.objectName():
+            self.deselectCards()
             return
-            
+        if checkDestination(labelSource.objectName) and labelDes.objectName() == "CardFromStock":
+            print("cant move from foundation to stock")
+            self.deselectCards()
+            return
+
+        # this is for the movement from stockpile to columns
         if labelSource.objectName() == "CardFromStock" and not checkDestination(labelDes.objectName()):
             card = self.currentStockCard
             if card is not None:
@@ -123,13 +130,30 @@ class UI(QMainWindow):
                 else:
                     self.deselectCards()
 
+        elif checkDestination(labelSource.objectName()) and isColumnLabel(labelDes):
+            print("herer i entered")
+            
+            card = self.currentFoundationCard
+            if card is not None:
+                print("jererere")
+                cardDes = self.LinkedList[extractColumnNumber(columnDes)-1].peakLast()
+                if self.checkValidMove(card, cardDes):
+                    print(self.currentFoundationCard)
+                    self.HandleFoundationPile(labelSource)
+                    self.moveFromFoundationToCol(columnDes, card, labelSource)
+                else:
+                    self.deselectCards()
+
+
+        # this is for the movement of card from either stockpile or columns to foundation pile of spade
         elif labelDes.objectName() == "spadesPile":
             if labelSource.objectName() == "CardFromStock":
                 card = self.currentStockCard
                 if card is not None:
                     if self.checkForSpadesFoundation(card):
                         self.foundationSpades.push(card)
-                        card.flipCard()
+                        if not card.isFaceUp:
+                            card.flipCard()
                         self.HandleWastePile()
                         setImage(self.SpadesPile, card.getCardImage())
             else:
@@ -141,13 +165,16 @@ class UI(QMainWindow):
                     else:
                         print("card not according to spade foundation criteria")
 
+
+        # this is for the movement of card from either stockpile or columns to foundation pile of hearts
         elif labelDes.objectName() == "heartsPile":
             if labelSource.objectName() == "CardFromStock":
                 card = self.currentStockCard
                 if card is not None:
                     if self.checkForHeartsFoundation(card):
                         self.foundationHearts.push(card)
-                        card.flipCard()
+                        if not card.isFaceUp:
+                            card.flipCard()
                         self.HandleWastePile()
                         setImage(self.HeartsPile, card.getCardImage())
             else:
@@ -159,13 +186,16 @@ class UI(QMainWindow):
                     else:
                         print("card not according to hearts foundation criteria")
 
+
+        # this is for the movement of card from either stockpile or columns to foundation pile of clubs
         elif labelDes.objectName() == "clubsPile":
             if labelSource.objectName() == "CardFromStock":
                 card = self.currentStockCard
                 if card is not None:
                     if self.checkForClubsFoundation(card):
                         self.foundationClubs.push(card)
-                        card.flipCard()
+                        if not card.isFaceUp:
+                            card.flipCard()
                         self.HandleWastePile()
                         setImage(self.ClubsPile, card.getCardImage())
             else:
@@ -178,13 +208,16 @@ class UI(QMainWindow):
                         print("card not according to clubs foundation criteria")
 
 
+
+        # this is for the movement of card from either stockpile or columns to foundation pile of diamonds
         elif labelDes.objectName() == "diamondsPile":
             if labelSource.objectName() == "CardFromStock":
                 card = self.currentStockCard
                 if card is not None:
                     if self.checkForDiamondsFoundation(card):
                         self.foundationDiamonds.push(card)
-                        card.flipCard()
+                        if not card.isFaceUp:
+                            card.flipCard()
                         self.HandleWastePile()
                         setImage(self.DiamondsPile, card.getCardImage())
             else:
@@ -197,7 +230,7 @@ class UI(QMainWindow):
                         print("card not according to diamonds foundation criteria")
 
 
-
+        # This is for the movement of cards between columns
         elif checkForColToCol(labelSource, labelDes):
             card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
             if card is not None:
@@ -209,12 +242,11 @@ class UI(QMainWindow):
                     self.dictionary.RemoveFromTableauDict(f"column{columnSource}", card)
 
                 else:
-                    removeBorder(self.firstSelected)
-                    self.firstSelected = None
-                    removeBorder(self.secondSelected)
-                    self.secondSelected = None
+                    self.deselectCards()
+
+
+        # this is to check if source is a column and if needs to pop a card
         if isColumnLabel(labelSource):
-        # self.tableauColumns[extractColumnNumber(columnDes)-1].push(card)
             if self.LinkedList[extractColumnNumber(columnSource)-1].getSize() == 0:
                 self.moveCardFromStackToList(extractColumnNumber(columnSource)-1)
                 self.dictionary.RemoveFromTableauDict(f"column{columnSource}", card)
@@ -312,6 +344,12 @@ class UI(QMainWindow):
         self.dictionary.AddtoTableauDict(f"column{columnDes}", card)
 
 
+    def moveFromFoundationToCol(self, columnDes, card, label):
+        self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
+        self.HandleFoundationPile(label)
+        self.dictionary.AddtoTableauDict(f"column{columnDes}", card)
+
+
     def AddCardInColumnList(self, columnNumber, card):
 
         if card is not None:  # Ensure that card is not None
@@ -350,6 +388,34 @@ class UI(QMainWindow):
     def peakFromWaste(self):
         return self.wastePile.peak()
 
+    def HandleFoundationPile(self, label):
+        stack = self.findFoundation(label)
+        self.currentFoundationCard = stack.peak()
+        self.updateFoundationPile(stack, label)
+
+    def updateFoundationPile(self, stack, label):
+        stack.pop()
+        card = stack.peak()
+
+        if card is not None:
+            card.isFaceUp = True
+            setImage(label, card.getCardImage())
+            self.currentFoundationCard = card
+        else: 
+            removeImage(label)
+            self.currentFoundationCard = None
+        
+    def findFoundation(self, label):
+        if label.objectName() == "SpadesPile":
+            stack = self.foundationSpades
+        elif label.objectName() == "HeartsPile":
+            stack = self.foundationHearts
+        elif label.objectName() == "DiamondsPile":
+            stack = self.foundationDiamonds
+        else:
+            stack = self.foundationClubs
+        return stack
+
     def updateWastePile(self):
         self.wastePile.pop()
         card = self.wastePile.peak()
@@ -368,6 +434,8 @@ class UI(QMainWindow):
 
     def checkValidMove(self,card1, card2):
         if validateRank(card1.rank) != validateRank(card2.rank)-1:
+            print(card1.getCardDetail())
+            print(card2.getCardDetail())
             print("not valid", card1.rank, "  ", card2.rank)
             return False
 
