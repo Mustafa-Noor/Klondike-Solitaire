@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel
 from PyQt5 import uic
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QMessageBox
 import sys
 
 
@@ -171,6 +172,8 @@ class UI(QMainWindow):
                     if self.checkForSpadesFoundation(card):
                         self.foundationSpades.push(card)
                         self.movefromColToFoundation(self.SpadesPile, columnSource, card)
+                        labelSource.clear()
+                        labelSource.hide()
                     else:
                         print("card not according to spade foundation criteria")
 
@@ -192,6 +195,8 @@ class UI(QMainWindow):
                     if self.checkForHeartsFoundation(card):
                         self.foundationHearts.push(card)
                         self.movefromColToFoundation(self.HeartsPile, columnSource, card)
+                        labelSource.clear()
+                        labelSource.hide()
                     else:
                         print("card not according to hearts foundation criteria")
 
@@ -213,6 +218,8 @@ class UI(QMainWindow):
                     if self.checkForClubsFoundation(card):
                         self.foundationClubs.push(card)
                         self.movefromColToFoundation(self.ClubsPile, columnSource, card)
+                        labelSource.clear()
+                        labelSource.hide()
                     else:
                         print("card not according to clubs foundation criteria")
 
@@ -235,6 +242,8 @@ class UI(QMainWindow):
                     if self.checkForDiamondsFoundation(card):
                         self.foundationDiamonds.push(card)
                         self.movefromColToFoundation(self.DiamondsPile, columnSource, card)
+                        labelSource.clear()
+                        labelSource.hide()
                     else:
                         print("card not according to diamonds foundation criteria")
 
@@ -280,6 +289,7 @@ class UI(QMainWindow):
 
             columnNumber = int(labelSource.objectName().split('_')[0][6])  
             labelNumber = int(labelSource.objectName().split('_')[2])
+            print("this is what you wanted",count+labelNumber)
             self.clearRemLabels(labelNumber, count+labelNumber, columnNumber)
                 
             
@@ -287,6 +297,7 @@ class UI(QMainWindow):
         self.updateTableau()
         self.initializeTableauLabels()
 
+        self.checkWinCondition()
 
     def clicker(self, sen):
         print(sen)
@@ -386,7 +397,23 @@ class UI(QMainWindow):
         print(index)
         return index
         
-        
+    def checkWinCondition(self):
+        # Check if all foundation piles have 13 cards
+        if (self.foundationSpades.getSize() == 13 and
+            self.foundationHearts.getSize() == 13 and
+            self.foundationClubs.getSize() == 13 and
+            self.foundationDiamonds.getSize() == 13):
+            
+            # Show message box if the win condition is met
+            self.showWinMessage()
+
+    def showWinMessage(self):
+        # Create and display the win message box
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("You Win!")
+        msg.setWindowTitle("Game Over")
+        msg.exec_()
 
     def moveFromStockToColumn(self, columnDes, card):
         self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
@@ -546,11 +573,11 @@ class UI(QMainWindow):
             return False
 
     def clearRemLabels(self,start, end, column):
-        for i in range(start, end):
+        for i in range(start, end+13):
             label = self.findChild(QLabel, f"column{column}_label_{i}")
-            label.clear()
-            label.hide()
-
+            if label is not None:
+                label.clear()
+                label.hide()
 
 
     def deselectCards(self):
