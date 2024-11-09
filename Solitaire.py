@@ -106,6 +106,7 @@ class UI(QMainWindow):
 
 
     def tryingMovement(self, labelSource, labelDes):
+        count = 0
         columnSource = extractColumn(labelSource.objectName())
         columnDes = extractColumn(labelDes.objectName())
 
@@ -133,6 +134,7 @@ class UI(QMainWindow):
                 else:
                     self.deselectCards()
 
+        # this is to move from foundation to columns
         elif checkDestination(labelSource.objectName()) and isColumnLabel(labelDes):
             print("herer i entered")
             stack = self.findFoundation(labelSource)
@@ -238,29 +240,49 @@ class UI(QMainWindow):
 
 
         # This is for the movement of cards between columns
-        elif checkForColToCol(labelSource, labelDes):
-            card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
-            if card is not None:
-                cardDes = self.LinkedList[extractColumnNumber(columnDes)-1].peakLast()
-                if self.checkValidMove(card, cardDes):
-                    self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
-                    self.dictionary.AddtoTableauDict(f"column{columnDes}", card)
-                    card = self.LinkedList[extractColumnNumber(columnSource)-1].removeCardFromLast()
-                    self.dictionary.RemoveFromTableauDict(f"column{columnSource}", card)
+        # elif checkForColToCol(labelSource, labelDes):
+        #     card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
+        #     if card is not None:
+        #         cardDes = self.LinkedList[extractColumnNumber(columnDes)-1].peakLast()
+        #         if self.checkValidMove(card, cardDes):
+        #             self.AddCardInColumnList(extractColumnNumber(columnDes)-1, card)
+        #             self.dictionary.AddtoTableauDict(f"column{columnDes}", card)
+        #             card = self.LinkedList[extractColumnNumber(columnSource)-1].removeCardFromLast()
+        #             self.dictionary.RemoveFromTableauDict(f"column{columnSource}", card)
 
+        #         else:
+        #             self.deselectCards()
+
+        elif checkForColToCol(labelSource, labelDes):
+            
+            columnNumber = extractColumnNumber(columnSource)
+            index = self.calculateIndexOfList(labelSource)
+            node = self.LinkedList[columnNumber-1].returnNodeAtIndex(index)
+            
+            if node is not None:
+                print(node.card.getCardDetail())
+                cardDes = self.LinkedList[extractColumnNumber(columnDes)-1].peakLast()
+                if self.checkValidMove(node.card, cardDes):
+                    count = self.AddCardsInColumnList(extractColumnNumber(columnDes)-1, node)
                 else:
+                    self.AddCardsInColumnList(columnNumber-1, node)
                     self.deselectCards()
+            else:
+                print("node is empty")
+
+
 
 
         # this is to check if source is a column and if needs to pop a card
         if isColumnLabel(labelSource):
             if self.LinkedList[extractColumnNumber(columnSource)-1].getSize() == 0:
                 self.moveCardFromStackToList(extractColumnNumber(columnSource)-1)
-                self.dictionary.RemoveFromTableauDict(f"column{columnSource}", card)
+
+            columnNumber = int(labelSource.objectName().split('_')[0][6])  
+            labelNumber = int(labelSource.objectName().split('_')[2])
+            self.clearRemLabels(labelNumber, count+labelNumber, columnNumber)
                 
-                
-            labelSource.clear()
-            labelSource.hide()
+            
 
         self.updateTableau()
         self.initializeTableauLabels()
@@ -354,6 +376,16 @@ class UI(QMainWindow):
         if not self.tableauColumns[column].isEmpty():
             card = self.tableauColumns[column].pop()
             self.AddCardInColumnList(column, card)
+
+    def calculateIndexOfList(self, label):
+        columnNumber = int(label.objectName().split('_')[0][6])  
+        labelNumber = int(label.objectName().split('_')[2])
+        print("columNumber", columnNumber)
+        print("labelNumber", labelNumber)
+        index = labelNumber - self.tableauColumns[columnNumber-1].getSize()
+        print(index)
+        return index
+        
         
 
     def moveFromStockToColumn(self, columnDes, card):
@@ -375,7 +407,16 @@ class UI(QMainWindow):
             
         else:
             print("Cannot add empty card to linked list")
+
+    def AddCardsInColumnList(self, columnNumber, node):
+
+        count = 0
+        if node is not None:  # Ensure that card is not None
+           count =  self.LinkedList[columnNumber].AddCards(node)
+        else:
+            print("Cannot add empty nodd to linked list")
         
+        return count
 
     def removeCardLast(self, columnNumber):
         if not self.LinkedList[columnNumber].isEmpty():
@@ -504,6 +545,12 @@ class UI(QMainWindow):
         else:
             return False
 
+    def clearRemLabels(self,start, end, column):
+        for i in range(start, end):
+            label = self.findChild(QLabel, f"column{column}_label_{i}")
+            label.clear()
+            label.hide()
+
 
 
     def deselectCards(self):
@@ -616,11 +663,9 @@ def PrepareGame(cards, stockPile, tableauColumns, dictionary, LinkedList):
     for i in range(len(cards)):
         stockPile.enqueue(cards.pop(0))
 
-# theory is that i select a card and the destination card i will check at which place destination card is present using hashmap iwll use that info to append the incoming card label at the end of the destination column
 
-# second approach added it to stack of that column then update
-# but find column using hashmap
-# def moveCards(col):
+
+
 
 
 
