@@ -1036,7 +1036,7 @@ def PrepareGame(cards, stockPile, tableauColumns, dictionary, LinkedList):
             tempStack = []
             for j in range(i+1):
                 card = cards.pop(0)
-                if j == i:
+                if j == i: # if it is the last index add in linked list
                     LinkedList[i].AddCard(card)
                     manageStateOfCard(card, dictionary, True)
                     dictionary.AddtoTableauDict(f"column{i+1}", card)
@@ -1048,7 +1048,6 @@ def PrepareGame(cards, stockPile, tableauColumns, dictionary, LinkedList):
                 tableauColumns[i].push(card)
                 dictionary.AddtoTableauDict(f"column{i+1}", card)
            
-
                 
     else:
         print("no cards to prepare")

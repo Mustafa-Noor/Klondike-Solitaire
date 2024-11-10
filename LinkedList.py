@@ -1,13 +1,15 @@
+
 class Node:
-    def __init__(self, card):
+    def __init__(self, card): # this is the constructor of card node class
         self.card = card
         self.next = None
 
 class LinkedListCards:
-    def __init__(self):
+    def __init__(self): # constructor of the linked list head is none
         self.head = None
 
 
+    # this is to add a card in the linked list
     def AddCard(self, card):
         newNode = Node(card)
         if self.head is None:
@@ -18,6 +20,7 @@ class LinkedListCards:
                 temp = temp.next    
             temp.next = newNode
 
+    # this is to add multiple cards in the linked list through a node and return its count
     def AddCards(self, node):
         count = 0
         if self.head is None:
@@ -31,7 +34,7 @@ class LinkedListCards:
         count += 1
         return count
             
-
+    # this is to return node at an index and end its next reference
     def returnNodeAtIndex(self, index):
         if self.head is None:
             return None
@@ -53,6 +56,7 @@ class LinkedListCards:
         return current
 
 
+    # this is to only get a node at index
     def peakNodeAtIndex(self, index):
         if self.head is None:
             return None
@@ -70,6 +74,7 @@ class LinkedListCards:
             return nodeToReturn
                 
 
+    # this is to remove card from the end of the list
     def removeCardFromLast(self):
         if self.head is None:
             return None
@@ -87,6 +92,7 @@ class LinkedListCards:
         temp.next = None
         return removedCard
 
+    # this is to peak card at the end of the list
     def peakLast(self):
         if self.head is None:
             return None
@@ -102,7 +108,7 @@ class LinkedListCards:
         removedCard = temp.next.card
         return removedCard
 
-    
+    # this si to get the size of the linked list
     def getSize(self):
         count = 0
         current = self.head
@@ -111,5 +117,6 @@ class LinkedListCards:
             current = current.next
         return count
     
+    # this is to check if the linked list is empty or not
     def isEmpty(self):
         return self.head == None
