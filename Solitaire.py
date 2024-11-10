@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel
+from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton
 from PyQt5 import uic
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMessageBox
@@ -47,6 +47,14 @@ class UI(QMainWindow):
         self.foundationClubs = Stack()
         self.foundationDiamonds = Stack()
 
+
+        self.stackForUndo = Stack()
+        self.sourceLabel = None
+        self.destinationLabel = None
+
+
+        self.undoButton = self.findChild(QPushButton, "undo")
+
         self.dictionary = Dictionaries()
 
         PrepareGame(self.cards,self.stockPile, self.tableauColumns, self.dictionary, self.LinkedList)
@@ -82,6 +90,11 @@ class UI(QMainWindow):
         self.HeartsPile.mousePressEvent = lambda event: self.checkClick(self.HeartsPile)
         self.ClubsPile.mousePressEvent = lambda event: self.checkClick(self.ClubsPile)
         self.DiamondsPile.mousePressEvent = lambda event: self.checkClick(self.DiamondsPile)
+
+        if self.undoButton is not None:
+            self.undoButton.clicked.connect(self.manageUndo)
+        else:
+            print("button not found")
 
         
 
@@ -165,6 +178,7 @@ class UI(QMainWindow):
                 if self.checkValidMove(card, cardDes):
                     self.moveFromStockToColumn(columnDes, card)
                     self.dictionary.AddtoTableauDict(f"column{extractColumnNumber(columnDes)}", card)
+                    self.takeReferencesForUndo(labelSource, labelDes)
                 else:
                     self.deselectCards()
 
@@ -183,6 +197,7 @@ class UI(QMainWindow):
                     self.dictionary.RemoveFromFoundationDict(labelSource.objectName(), card)
                     self.dictionary.AddtoTableauDict(extractColumnNumber(columnDes),card)
                     self.scoreObject.removePoints(5)
+                    self.takeReferencesForUndo(labelSource, labelDes)
 
                 else:
                     self.deselectCards()
@@ -195,13 +210,16 @@ class UI(QMainWindow):
             if labelSource.objectName() == "CardFromStock":
                 card = self.currentStockCard
                 if card is not None:
+                    print(f"Current Stock Card: {card.getCardDetail()}")
                     if self.checkForSpadesFoundation(card):
+                        print("Move valid")
                         self.foundationSpades.push(card)
                         manageStateOfCard(card, self.dictionary, True)
                         self.HandleWastePile()
                         setImage(self.SpadesPile, card.getCardImage())
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
                         self.scoreObject.addPoints(10)
+                        self.takeReferencesForUndo(labelSource, labelDes)
             else:
                 card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
                 if card is not None:
@@ -212,6 +230,7 @@ class UI(QMainWindow):
                         labelSource.clear()
                         labelSource.hide()
                         self.scoreObject.addPoints(10)
+                        self.takeReferencesForUndo(labelSource, labelDes)
                     else:
                         print("card not according to spade foundation criteria")
 
@@ -228,6 +247,7 @@ class UI(QMainWindow):
                         setImage(self.HeartsPile, card.getCardImage())
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
                         self.scoreObject.addPoints(10)
+                        self.takeReferencesForUndo(labelSource, labelDes)
             else:
                 card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
                 if card is not None:
@@ -238,6 +258,7 @@ class UI(QMainWindow):
                         labelSource.clear()
                         labelSource.hide()
                         self.scoreObject.addPoints(10)
+                        self.takeReferencesForUndo(labelSource, labelDes)
                     else:
                         print("card not according to hearts foundation criteria")
 
@@ -254,6 +275,7 @@ class UI(QMainWindow):
                         setImage(self.ClubsPile, card.getCardImage())
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
                         self.scoreObject.addPoints(10)
+                        self.takeReferencesForUndo(labelSource, labelDes)
             else:
                 card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
                 if card is not None:
@@ -264,6 +286,7 @@ class UI(QMainWindow):
                         labelSource.clear()
                         labelSource.hide()
                         self.scoreObject.addPoints(10)
+                        self.takeReferencesForUndo(labelSource, labelDes)
                     else:
                         print("card not according to clubs foundation criteria")
 
@@ -275,11 +298,13 @@ class UI(QMainWindow):
                 card = self.currentStockCard
                 if card is not None:
                     if self.checkForDiamondsFoundation(card):
+                        self.foundationDiamonds.push(card)
                         manageStateOfCard(card, self.dictionary, True)
                         self.HandleWastePile()
                         setImage(self.DiamondsPile, card.getCardImage())
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
                         self.scoreObject.addPoints(10)
+                        self.takeReferencesForUndo(labelSource, labelDes)
             else:
                 card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
                 if card is not None:
@@ -290,6 +315,7 @@ class UI(QMainWindow):
                         labelSource.clear()
                         labelSource.hide()
                         self.scoreObject.addPoints(10)
+                        self.takeReferencesForUndo(labelSource, labelDes)
                     else:
                         print("card not according to diamonds foundation criteria")
 
@@ -311,6 +337,7 @@ class UI(QMainWindow):
                         self.dictionary.RemoveFromTableauDict(columnNumber, current.card)
                         current = current.next
                     
+                    self.takeReferencesForUndo(labelSource, labelDes)
                     self.scoreObject.addPoints(5)
                 else:
                     current = node
@@ -448,6 +475,153 @@ class UI(QMainWindow):
 
     
 
+    def takeReferencesForUndo(self, labelSource, labelDes):
+        self.sourceLabel = labelDes
+        self.destinationLabel = labelSource
+
+    def undoFromColumnToFoundation(self):
+        self.tryingMovement(self.sourceLabel, self.destinationLabel)
+
+    def undoFromColumnToStock(self):
+        columnNumberOfDes = extractColumnNumber(extractColumn(self.sourceLabel.objectName()))-1
+
+        # column = extractColumn(self.sourceLabel.objectName())
+        card = self.LinkedList[columnNumberOfDes].removeCardFromLast()
+        self.wastePile.push(card)
+        self.currentStockCard = self.wastePile.peak()
+        self.updateWastePileForUndo()
+
+        totalSize = self.tableauColumns[columnNumberOfDes].getSize() + self.LinkedList[columnNumberOfDes].getSize()
+
+        # for i in range(0, totalSize):
+        #     label = self.findChild(QLabel, f"column{column}_label_{i}")
+        #     if label is not None:
+        #         label.clear()
+        #         label.hide()
+
+        self.sourceLabel.clear()
+        self.sourceLabel.hide()
+        self.scoreObject.removePoints(20)
+        self.sourceLabel = None
+        self.destinationLabel = None
+
+
+        self.updateScore()
+        self.updateTableau()
+        self.initializeTableauLabels()
+
+
+
+    def manageUndo(self):
+        if self.sourceLabel is not None and self.destinationLabel is not None:
+            print(self.sourceLabel.objectName())
+            print(self.destinationLabel.objectName())
+            if isColumnLabel(self.sourceLabel) and checkDestination(self.destinationLabel.objectName()):
+
+                self.undoFromColumnToFoundation()
+
+            elif checkDestination(self.sourceLabel.objectName()):
+                if self.destinationLabel.objectName() == "CardFromStock":
+                    self.undoFromFoundationToStock()
+                else:
+                    self.sourceLabel = self.findChild(QLabel, extractColumn(self.sourceLabel.objectName())) 
+                    self.undoFromFoundationToColumn()
+
+            elif self.destinationLabel.objectName() == "CardFromStock":
+                 self.undoFromColumnToStock()
+                
+            elif isColumnLabel(self.sourceLabel) and isColumnLabel(self.destinationLabel):
+                # self.tryingMovement(self.sourceLabel, self.destinationLabel)
+                self.undoFromColToCol()
+
+            else:
+                print("nahi mila")
+
+            self.sourceLabel = None
+            self.destinationLabel = None
+        else:
+            print("abhi khali hai")
+
+    def undoFromColToCol(self):
+        
+        count = 0
+        columnNumberOfDes = extractColumnNumber(extractColumn(self.destinationLabel.objectName()))-1
+        columnNumberOfSource = extractColumnNumber(extractColumn(self.sourceLabel.objectName()))-1
+
+        if self.LinkedList[columnNumberOfDes].getSize() > 1 or self.LinkedList[columnNumberOfDes].getSize() < 1:
+            index = self.calculateIndexOfList(self.sourceLabel)
+            node = self.LinkedList[columnNumberOfSource].returnNodeAtIndex(index+1)
+            if node is not None:
+                print(node.card.getCardDetail())
+                count = self.AddCardsInColumnList(columnNumberOfDes, node)
+            else:
+                print("nonenenene")
+
+        elif self.LinkedList[columnNumberOfDes].getSize() == 1:
+            card = self.LinkedList[columnNumberOfDes].removeCardFromLast()
+            self.tableauColumns[columnNumberOfDes].push(card)
+            print(self.sourceLabel.objectName())
+            index = self.calculateIndexOfList(self.sourceLabel)
+            node = self.LinkedList[columnNumberOfSource].returnNodeAtIndex(index+1)
+            if node is not None:
+                print(node.card.getCardDetail())
+                count = self.AddCardsInColumnList(columnNumberOfDes, node)
+            else:
+                print("nonenenene")
+
+        
+        columnNumber = int(self.sourceLabel.objectName().split('_')[0][6])  
+        labelNumber = int(self.sourceLabel.objectName().split('_')[2])
+        self.clearRemLabels(labelNumber, count+labelNumber, columnNumber)
+        self.updateTableau()
+        self.initializeTableauLabels()
+
+            
+
+
+    def undoFromFoundationToStock(self):
+        stack = self.findFoundation(self.sourceLabel)
+        if stack:
+            print(stack.getSize())
+        newCard = stack.pop()
+        self.wastePile.push(newCard)
+        self.currentStockCard = self.wastePile.peak()
+        self.updateWastePileForUndo()
+        self.sourceLabel.clear()
+        self.scoreObject.removePoints(20)
+        self.sourceLabel = None
+        self.destinationLabel = None
+
+    def undoFromFoundationToColumn(self):
+        columnNumberOfDes = extractColumnNumber(extractColumn(self.destinationLabel.objectName()))-1
+
+        if self.LinkedList[columnNumberOfDes].getSize() > 1 or self.LinkedList[columnNumberOfDes].getSize() < 1:
+            self.tryingMovement(self.sourceLabel, self.destinationLabel)
+            self.scoreObject.removePoints(20)
+        elif self.LinkedList[columnNumberOfDes].getSize() == 1:
+            card = self.LinkedList[columnNumberOfDes].removeCardFromLast()
+            self.tableauColumns[columnNumberOfDes].push(card)
+            stack = self.findFoundation(self.sourceLabel)
+            if stack:
+                print(stack.getSize())
+            newCard = stack.pop()
+            self.LinkedList[columnNumberOfDes].AddCard(newCard)
+            print(stack.getSize())
+            self.sourceLabel.clear()
+            self.scoreObject.removePoints(20)
+
+        self.updateScore()
+        self.updateTableau()
+        self.initializeTableauLabels()
+
+            
+
+        
+
+
+
+
+
         
     def checkWinCondition(self):
         # Check if all foundation piles have 13 cards
@@ -540,11 +714,11 @@ class UI(QMainWindow):
     def findFoundation(self, label):
         if label.objectName().lower() == "spadespile":
             return self.foundationSpades
-        elif label.objectName() == "heartspile":
+        elif label.objectName().lower() == "heartspile":
             return self.foundationHearts
-        elif label.objectName() == "diamondspile":
+        elif label.objectName().lower() == "diamondspile":
             return self.foundationDiamonds
-        else:
+        elif label.objectName().lower() == "clubspile":
             return self.foundationClubs
 
     def updateWastePile(self):
@@ -567,7 +741,8 @@ class UI(QMainWindow):
         if card2 is None:
             #means moving card to empty column
             return True
-        if validateRank(card1.rank) != validateRank(card2.rank)-1:
+
+        if self.dictionary.getRank(card1.rank) != self.dictionary.getRank(card2.rank)-1:
             print(card1.getCardDetail())
             print(card2.getCardDetail())
             print("not valid", card1.rank, "  ", card2.rank)
@@ -582,10 +757,10 @@ class UI(QMainWindow):
     def checkForSpadesFoundation(self, card):
         lastCard = self.foundationSpades.peak()
         if lastCard is not None:
-            if card.suit.lower() == "spades" and validateRank(card.rank) == validateRank(lastCard.rank)+1:
+            if card.suit.lower() == "spades" and self.dictionary.getRank(card.rank) == self.dictionary.getRank(lastCard.rank)+1:
                 return True
         elif lastCard is None:
-            if card.suit.lower() == "spades" and validateRank(card.rank) == 1:
+            if card.suit.lower() == "spades" and self.dictionary.getRank(card.rank) == 1:
                 return True
         else:
             return False
@@ -594,10 +769,10 @@ class UI(QMainWindow):
     def checkForHeartsFoundation(self, card):
         lastCard = self.foundationHearts.peak()
         if lastCard is not None:
-            if card.suit.lower() == "hearts" and validateRank(card.rank) == validateRank(lastCard.rank)+1:
+            if card.suit.lower() == "hearts" and self.dictionary.getRank(card.rank) == self.dictionary.getRank(lastCard.rank)+1:
                 return True
         elif lastCard is None:
-            if card.suit.lower() == "hearts" and validateRank(card.rank) == 1:
+            if card.suit.lower() == "hearts" and self.dictionary.getRank(card.rank) == 1:
                 return True
         else:
             return False
@@ -605,10 +780,10 @@ class UI(QMainWindow):
     def checkForClubsFoundation(self, card):
         lastCard = self.foundationClubs.peak()
         if lastCard is not None:
-            if card.suit.lower() == "clubs" and validateRank(card.rank) == validateRank(lastCard.rank)+1:
+            if card.suit.lower() == "clubs" and self.dictionary.getRank(card.rank) == self.dictionary.getRank(lastCard.rank)+1:
                 return True
         elif lastCard is None:
-            if card.suit.lower() == "clubs" and validateRank(card.rank) == 1:
+            if card.suit.lower() == "clubs" and self.dictionary.getRank(card.rank) == 1:
                 return True
         else:
             return False
@@ -616,11 +791,12 @@ class UI(QMainWindow):
 
     def checkForDiamondsFoundation(self, card):
         lastCard = self.foundationDiamonds.peak()
+
         if lastCard is not None:
-            if card.suit.lower() == "diamonds" and validateRank(card.rank) == validateRank(lastCard.rank)+1:
+            if card.suit.lower() == "diamonds" and self.dictionary.getRank(card.rank) == self.dictionary.getRank(lastCard.rank)+1:
                 return True
         elif lastCard is None:
-            if card.suit.lower() == "diamonds" and validateRank(card.rank) == 1:
+            if card.suit.lower() == "diamonds" and self.dictionary.getRank(card.rank) == 1:
                 return True
         else:
             return False
@@ -632,6 +808,16 @@ class UI(QMainWindow):
                 label.clear()
                 label.hide()
 
+    def updateWastePileForUndo(self):
+        card = self.wastePile.peak()
+        
+        if card is not None:
+            manageStateOfCard(card, self.dictionary, True)
+            setImage(self.CardFromStock, card.getCardImage())
+            self.currentStockCard = card
+        else: 
+            removeImage(self.CardFromStock)
+            self.currentStockCard = None
 
     def deselectCards(self):
         removeBorder(self.firstSelected)
@@ -702,22 +888,11 @@ def giveBorder(label):
     label.update()
 
 def removeBorder(label):
-    label.setStyleSheet("")
-    label.update()
+    if label is not None:
+        label.setStyleSheet("")
+        label.update()
 
-
-def validateRank(rank):
-    if rank == "ace":
-       
-        return 1
-    elif rank == "jack":
-        return 11
-    elif  rank == "queen":
-        return 12
-    elif rank == "king":
-        return 13
-    else:
-        return int(rank)    
+ 
 
 
     

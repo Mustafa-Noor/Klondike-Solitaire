@@ -28,6 +28,21 @@ class Dictionaries:
             'clubs' : 'black'
         }
 
+
+        self.rankMap = {
+            'ace' : 1,
+            'jack' : 11,
+            'queen' : 12,
+            'king' : 13
+        }
+
+
+    def getRank(self, rank):
+        if rank.lower() in self.rankMap:
+            return self.rankMap[rank.lower()]
+        else:
+            return int(rank)
+
     def getTableau(self):
         return self.tableau
 
@@ -73,7 +88,7 @@ class Dictionaries:
         print("\nCard States:") 
         for cardDetails, state in self.cardState.items():
              print(f"Card: {cardDetails}, State: {state}")
-             
+
 
     def giveState(self, card):
         if card.getCardDetail() in self.cardState:

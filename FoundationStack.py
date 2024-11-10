@@ -10,6 +10,8 @@ class Stack:
         else:
             self.data[self.top] = card
 
+        print(card.getCardDetail(), "added to stack of foundation")
+
     def isEmpty(self):
         if self.top == -1:
             return True
