@@ -12,10 +12,10 @@ class Dictionaries:
         }
 
         self.foundationPiles = {
-            "spades" : [],
-            "clubs" : [],
-            "hearts" : [],
-            "diamonds" : []
+            "spadespile" : [],
+            "clubspile" : [],
+            "heartspile" : [],
+            "diamondspile" : []
         }
 
         self.cardState = {}
@@ -31,6 +31,17 @@ class Dictionaries:
     def getTableau(self):
         return self.tableau
 
+    def changeState(self, card, faceUp):
+        cardDetails = card.getCardDetail()
+        if cardDetails not in self.cardState:
+            self.AddCardToStates(card)
+        card.isFaceUp = faceUp
+        self.cardState[cardDetails] = card.getState()
+
+
+    def AddCardToStates(self, card):
+        self.cardState[card.getCardDetail()] = card.getState()
+
     def AddtoTableauDict(self, column, card):
         if column in self.tableau:
             self.tableau[column].append(card)
@@ -41,9 +52,32 @@ class Dictionaries:
             if card in self.tableau[column]: 
                 self.tableau[column].remove(card) 
                 del self.cardState[card.getCardDetail()] 
-                if not self.tableau[column]: 
-                    del self.tableau[column]
-
 
     def AddToFoundationDict(self, suit, card):
         self.foundationPiles[suit.lower()].append(card)
+
+    def RemoveFromFoundationDict(self, suit, card):
+        if suit.lower() in self.foundationPiles:
+            if card in self.foundationPiles[suit.lower()]:
+                self.foundationPiles[suit.lower()].remove(card)
+
+
+    def DisplayAllDictionary(self):
+        print()
+        print("Foundation Piles")
+        for pile, cards in self.foundationPiles.items():
+            print(f"Pile: {pile}")
+            for card in cards:
+                print(f"Card: {card.getCardDetail()}")
+
+        print("\nCard States:") 
+        for cardDetails, state in self.cardState.items():
+             print(f"Card: {cardDetails}, State: {state}")
+             
+
+    def giveState(self, card):
+        if card.getCardDetail() in self.cardState:
+            return self.cardState[card.getCardDetail()]
+        else:
+            return None
+
