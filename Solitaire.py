@@ -72,6 +72,9 @@ class UI(QMainWindow):
 
 
 
+        self.faultLabel = self.findChild(QLabel, "error")
+
+
         self.clockLabel = self.findChild(QLabel, "clock")
         self.scoreLabel = self.findChild(QLabel, "score")
 
@@ -164,9 +167,11 @@ class UI(QMainWindow):
 
         if checkDestination(labelSource.objectName()) and labelDes.objectName() == "CardFromStock":
             print("cant move from foundation to stock")
+            self.faultLabel.setText("can't move from foundation to stock")
             self.deselectCards()
             return
         if checkDestination(labelSource.objectName()) and checkDestination(labelDes.objectName()):
+            self.faultLabel.setText("can't move from foundation to foundation")
             self.deselectCards()
             return
 
@@ -179,8 +184,10 @@ class UI(QMainWindow):
                     self.moveFromStockToColumn(columnDes, card)
                     self.dictionary.AddtoTableauDict(f"column{extractColumnNumber(columnDes)}", card)
                     self.takeReferencesForUndo(labelSource, labelDes)
+                    self.faultLabel.setText("")
                 else:
                     self.deselectCards()
+                    self.faultLabel.setText("not a valid move")
 
         # this is to move from foundation to columns
         elif checkDestination(labelSource.objectName()) and isColumnLabel(labelDes):
@@ -220,6 +227,7 @@ class UI(QMainWindow):
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
                         self.scoreObject.addPoints(10)
                         self.takeReferencesForUndo(labelSource, labelDes)
+                        self.faultLabel.setText("")
             else:
                 card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
                 if card is not None:
@@ -231,8 +239,10 @@ class UI(QMainWindow):
                         labelSource.hide()
                         self.scoreObject.addPoints(10)
                         self.takeReferencesForUndo(labelSource, labelDes)
+                        self.faultLabel.setText("")
                     else:
                         print("card not according to spade foundation criteria")
+                        self.faultLabel.setText("card not according to spades foundation criteria")
 
 
         # this is for the movement of card from either stockpile or columns to foundation pile of hearts
@@ -248,6 +258,7 @@ class UI(QMainWindow):
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
                         self.scoreObject.addPoints(10)
                         self.takeReferencesForUndo(labelSource, labelDes)
+                        self.faultLabel.setText("")
             else:
                 card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
                 if card is not None:
@@ -259,8 +270,10 @@ class UI(QMainWindow):
                         labelSource.hide()
                         self.scoreObject.addPoints(10)
                         self.takeReferencesForUndo(labelSource, labelDes)
+                        self.faultLabel.setText("")
                     else:
                         print("card not according to hearts foundation criteria")
+                        self.faultLabel.setText("card not according to hearts foundation criteria")
 
 
         # this is for the movement of card from either stockpile or columns to foundation pile of clubs
@@ -276,6 +289,7 @@ class UI(QMainWindow):
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
                         self.scoreObject.addPoints(10)
                         self.takeReferencesForUndo(labelSource, labelDes)
+                        self.faultLabel.setText("")
             else:
                 card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
                 if card is not None:
@@ -287,8 +301,10 @@ class UI(QMainWindow):
                         labelSource.hide()
                         self.scoreObject.addPoints(10)
                         self.takeReferencesForUndo(labelSource, labelDes)
+                        self.faultLabel.setText("")
                     else:
                         print("card not according to clubs foundation criteria")
+                        self.faultLabel.setText("card not according to clubs foundation criteria")
 
 
 
@@ -305,6 +321,7 @@ class UI(QMainWindow):
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
                         self.scoreObject.addPoints(10)
                         self.takeReferencesForUndo(labelSource, labelDes)
+                        self.faultLabel.setText("")
             else:
                 card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
                 if card is not None:
@@ -316,8 +333,10 @@ class UI(QMainWindow):
                         labelSource.hide()
                         self.scoreObject.addPoints(10)
                         self.takeReferencesForUndo(labelSource, labelDes)
+                        self.faultLabel.setText("")
                     else:
                         print("card not according to diamonds foundation criteria")
+                        self.faultLabel.setText("card not according to diamond foundation criteria")
 
 
         elif checkForColToCol(labelSource, labelDes):
@@ -481,6 +500,7 @@ class UI(QMainWindow):
 
     def undoFromColumnToFoundation(self):
         self.tryingMovement(self.sourceLabel, self.destinationLabel)
+        self.scoreObject.removePoints(20)
 
     def undoFromColumnToStock(self):
         columnNumberOfDes = extractColumnNumber(extractColumn(self.sourceLabel.objectName()))-1
@@ -514,6 +534,7 @@ class UI(QMainWindow):
 
     def manageUndo(self):
         if self.sourceLabel is not None and self.destinationLabel is not None:
+            self.faultLabel.setText("")
             print(self.sourceLabel.objectName())
             print(self.destinationLabel.objectName())
             if isColumnLabel(self.sourceLabel) and checkDestination(self.destinationLabel.objectName()):
@@ -535,12 +556,13 @@ class UI(QMainWindow):
                 self.undoFromColToCol()
 
             else:
-                print("nahi mila")
+                print("couldnt find")
 
             self.sourceLabel = None
             self.destinationLabel = None
         else:
-            print("abhi khali hai")
+            print("nothing to undo")
+            self.faultLabel.setText("Nothing to Undo")
 
     def undoFromColToCol(self):
         
@@ -554,6 +576,7 @@ class UI(QMainWindow):
             if node is not None:
                 print(node.card.getCardDetail())
                 count = self.AddCardsInColumnList(columnNumberOfDes, node)
+                self.scoreObject.removePoints(20)
             else:
                 print("nonenenene")
 
@@ -566,6 +589,7 @@ class UI(QMainWindow):
             if node is not None:
                 print(node.card.getCardDetail())
                 count = self.AddCardsInColumnList(columnNumberOfDes, node)
+                self.scoreObject.removePoints(20)
             else:
                 print("nonenenene")
 
@@ -614,15 +638,7 @@ class UI(QMainWindow):
         self.updateTableau()
         self.initializeTableauLabels()
 
-            
 
-        
-
-
-
-
-
-        
     def checkWinCondition(self):
         # Check if all foundation piles have 13 cards
         if (self.foundationSpades.getSize() == 13 and
@@ -746,23 +762,29 @@ class UI(QMainWindow):
             print(card1.getCardDetail())
             print(card2.getCardDetail())
             print("not valid", card1.rank, "  ", card2.rank)
+            self.faultLabel.setText("Not a valid Move")
             return False
 
         if self.dictionary.colourMap[card1.suit.lower()] == self.dictionary.colourMap[card2.suit.lower()]:
             print("not valid", card1.suit, "  ", card2.suit)
+            self.faultLabel.setText("Not a valid Move")
             return False
-        
+
+        self.faultLabel.setText("")
         return True
 
     def checkForSpadesFoundation(self, card):
         lastCard = self.foundationSpades.peak()
         if lastCard is not None:
             if card.suit.lower() == "spades" and self.dictionary.getRank(card.rank) == self.dictionary.getRank(lastCard.rank)+1:
+                self.faultLabel.setText("")
                 return True
         elif lastCard is None:
             if card.suit.lower() == "spades" and self.dictionary.getRank(card.rank) == 1:
+                self.faultLabel.setText("")
                 return True
         else:
+            self.faultLabel.setText("Not valid")
             return False
 
 
@@ -770,22 +792,28 @@ class UI(QMainWindow):
         lastCard = self.foundationHearts.peak()
         if lastCard is not None:
             if card.suit.lower() == "hearts" and self.dictionary.getRank(card.rank) == self.dictionary.getRank(lastCard.rank)+1:
+                self.faultLabel.setText("")
                 return True
         elif lastCard is None:
             if card.suit.lower() == "hearts" and self.dictionary.getRank(card.rank) == 1:
+                self.faultLabel.setText("")
                 return True
         else:
+            self.faultLabel.setText("not valid")
             return False
 
     def checkForClubsFoundation(self, card):
         lastCard = self.foundationClubs.peak()
         if lastCard is not None:
             if card.suit.lower() == "clubs" and self.dictionary.getRank(card.rank) == self.dictionary.getRank(lastCard.rank)+1:
+                self.faultLabel.setText("")
                 return True
         elif lastCard is None:
             if card.suit.lower() == "clubs" and self.dictionary.getRank(card.rank) == 1:
+                self.faultLabel.setText("")
                 return True
         else:
+            self.faultLabel.setText("not valid")
             return False
 
 
@@ -794,11 +822,14 @@ class UI(QMainWindow):
 
         if lastCard is not None:
             if card.suit.lower() == "diamonds" and self.dictionary.getRank(card.rank) == self.dictionary.getRank(lastCard.rank)+1:
+                self.faultLabel.setText("")
                 return True
         elif lastCard is None:
             if card.suit.lower() == "diamonds" and self.dictionary.getRank(card.rank) == 1:
+                self.faultLabel.setText("")
                 return True
         else:
+            self.faultLabel.setText("not valid")
             return False
 
     def clearRemLabels(self,start, end, column):
