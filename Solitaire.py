@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel
 from PyQt5 import uic
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QTimer, QElapsedTimer
 import sys
 
 
@@ -12,6 +13,7 @@ from Tableau import TableauPile
 from TableauColumn import TableauColumnClass
 from LinkedList import LinkedListCards
 from Dictionary import Dictionaries
+from ScoreClass import Score
 import random
 
 
@@ -22,6 +24,14 @@ class UI(QMainWindow):
         # LOAD THE UI FILE
 
         uic.loadUi("SolitaireUI.ui", self)
+        self.startTimer()
+
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.updateClock)
+        self.timer.start(1000)
+
+        self.scoreObject = Score()
 
 
         self.cards = InitializeDeck()
@@ -52,6 +62,10 @@ class UI(QMainWindow):
         self.tableauTable = []  
         
 
+
+
+        self.clockLabel = self.findChild(QLabel, "clock")
+        self.scoreLabel = self.findChild(QLabel, "score")
 
 
         self.stockLabel = self.findChild(QLabel, "Stockpile")
@@ -87,7 +101,24 @@ class UI(QMainWindow):
                     self.tableauTable.append(label)
                     label.mousePressEvent = lambda event, lbl=label: self.checkClick(lbl)
                     lastLabel = label
+
+
+    def updateScore(self):
+        self.scoreLabel.setText(f"Score : {str(self.scoreObject.getScore())}")
+
+
+    def startTimer(self):
+        self.eTimer = QElapsedTimer()
+        self.eTimer.start()
                 
+
+    def updateClock(self):
+        time = self.eTimer.elapsed()
+        seconds = (time//1000)%60
+        mins = (time // (1000*60))%60
+        hours = (time // (1000*60*60))%24
+        timeString = f"{hours:02}:{mins:02}:{seconds:02}"
+        self.clockLabel.setText(timeString)
 
     def checkClick(self, label):
 
@@ -151,6 +182,7 @@ class UI(QMainWindow):
                     self.moveFromFoundationToCol(columnDes, card, labelSource)
                     self.dictionary.RemoveFromFoundationDict(labelSource.objectName(), card)
                     self.dictionary.AddtoTableauDict(extractColumnNumber(columnDes),card)
+                    self.scoreObject.removePoints(5)
 
                 else:
                     self.deselectCards()
@@ -169,6 +201,7 @@ class UI(QMainWindow):
                         self.HandleWastePile()
                         setImage(self.SpadesPile, card.getCardImage())
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
+                        self.scoreObject.addPoints(10)
             else:
                 card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
                 if card is not None:
@@ -178,6 +211,7 @@ class UI(QMainWindow):
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
                         labelSource.clear()
                         labelSource.hide()
+                        self.scoreObject.addPoints(10)
                     else:
                         print("card not according to spade foundation criteria")
 
@@ -193,6 +227,7 @@ class UI(QMainWindow):
                         self.HandleWastePile()
                         setImage(self.HeartsPile, card.getCardImage())
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
+                        self.scoreObject.addPoints(10)
             else:
                 card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
                 if card is not None:
@@ -202,6 +237,7 @@ class UI(QMainWindow):
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
                         labelSource.clear()
                         labelSource.hide()
+                        self.scoreObject.addPoints(10)
                     else:
                         print("card not according to hearts foundation criteria")
 
@@ -217,6 +253,7 @@ class UI(QMainWindow):
                         self.HandleWastePile()
                         setImage(self.ClubsPile, card.getCardImage())
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
+                        self.scoreObject.addPoints(10)
             else:
                 card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
                 if card is not None:
@@ -226,6 +263,7 @@ class UI(QMainWindow):
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
                         labelSource.clear()
                         labelSource.hide()
+                        self.scoreObject.addPoints(10)
                     else:
                         print("card not according to clubs foundation criteria")
 
@@ -241,6 +279,7 @@ class UI(QMainWindow):
                         self.HandleWastePile()
                         setImage(self.DiamondsPile, card.getCardImage())
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
+                        self.scoreObject.addPoints(10)
             else:
                 card = self.LinkedList[extractColumnNumber(columnSource)-1].peakLast()
                 if card is not None:
@@ -250,6 +289,7 @@ class UI(QMainWindow):
                         self.dictionary.AddToFoundationDict(labelDes.objectName(), card)
                         labelSource.clear()
                         labelSource.hide()
+                        self.scoreObject.addPoints(10)
                     else:
                         print("card not according to diamonds foundation criteria")
 
@@ -270,6 +310,8 @@ class UI(QMainWindow):
                         self.dictionary.AddtoTableauDict(extractColumnNumber(columnDes), current.card)
                         self.dictionary.RemoveFromTableauDict(columnNumber, current.card)
                         current = current.next
+                    
+                    self.scoreObject.addPoints(5)
                 else:
                     current = node
                     while current is not None:
@@ -290,17 +332,17 @@ class UI(QMainWindow):
             if self.LinkedList[extractColumnNumber(columnSource)-1].getSize() == 0:
                 self.moveCardFromStackToList(extractColumnNumber(columnSource)-1)
 
+                
+
             columnNumber = int(labelSource.objectName().split('_')[0][6])  
             labelNumber = int(labelSource.objectName().split('_')[2])
-            print("this is what you wanted",count+labelNumber)
             self.clearRemLabels(labelNumber, count+labelNumber, columnNumber)
                 
             
 
         self.updateTableau()
         self.initializeTableauLabels()
-
-        self.dictionary.DisplayAllDictionary()
+        self.updateScore()
 
         self.checkWinCondition()
 
@@ -393,6 +435,7 @@ class UI(QMainWindow):
             card = self.tableauColumns[column].pop()
             self.AddCardInColumnList(column, card)
             self.dictionary.AddtoTableauDict(f"column{column+1}", card)
+            self.scoreObject.addPoints(10)
 
     def calculateIndexOfList(self, label):
         columnNumber = int(label.objectName().split('_')[0][6])  
