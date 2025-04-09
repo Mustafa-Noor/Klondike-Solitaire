@@ -47,7 +47,7 @@ python solitaire.py
 ### Game Layout
 ![Game Layout](Images/start.png)
 
-![Card Move](images/mid.png)
+![Card Move](Images/mid.png)
 
 
 ## Dependencies
